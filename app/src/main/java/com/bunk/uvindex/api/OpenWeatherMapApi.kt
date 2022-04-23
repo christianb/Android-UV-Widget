@@ -1,6 +1,6 @@
 package com.bunk.uvindex.api
 
-import retrofit2.Response
+import com.bunk.uvindex.api.result.ApiResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -11,5 +11,5 @@ interface OpenWeatherMapApi {
 		@Query("lat") latitude: String,
 		@Query("lon") longitude: String,
 		@Query("appid") apiKey: String,
-	): Response<WeatherData>
+	): ApiResponse<WeatherData>
 }

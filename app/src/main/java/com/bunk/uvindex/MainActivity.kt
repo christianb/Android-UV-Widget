@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import com.bunk.uvindex.api.OpenWeatherMapApi
 import com.bunk.uvindex.api.WeatherData
 import com.bunk.uvindex.ui.theme.UvIndexTheme
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import retrofit2.Call
@@ -39,16 +40,16 @@ class MainActivity : ComponentActivity() {
 
 	override fun onStart() {
 		super.onStart()
+		Timber.d("onStart")
 
 		lifecycleScope.launch {
-			val response: Response<WeatherData> = openWeatherMapApi.getData(
+			val response: WeatherData? = openWeatherMapApi.getData(
 				latitude = "52.520008",
 				longitude = "13.404954",
 				apiKey = BuildConfig.API_KEY
-			)
+			).dataOrNull
 
-			Timber.d("${response.code()}")
-			Timber.d("UV-Index: ${response.body()?.current?.uvi}")
+			Timber.d("UV-Index: ${response?.current?.uvi}")
 		}
 	}
 }
