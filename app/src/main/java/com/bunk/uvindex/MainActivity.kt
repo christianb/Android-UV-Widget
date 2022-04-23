@@ -1,8 +1,5 @@
 package com.bunk.uvindex
 
-import android.appwidget.AppWidgetManager
-import android.content.ComponentName
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -17,12 +14,8 @@ import androidx.lifecycle.lifecycleScope
 import com.bunk.uvindex.api.OpenWeatherMapApi
 import com.bunk.uvindex.api.WeatherData
 import com.bunk.uvindex.ui.theme.UvIndexTheme
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import timber.log.Timber
 import kotlin.math.roundToInt
 
@@ -55,15 +48,15 @@ class MainActivity : ComponentActivity() {
 		// longitude = "13.404954",
 
 		lifecycleScope.launch {
-			val response: WeatherData? = openWeatherMapApi.getData(
-				latitude = "25.761681",
-				longitude = "-80.191788",
-				apiKey = BuildConfig.API_KEY
-			).dataOrNull
+//			val response: WeatherData? = openWeatherMapApi.getData(
+//				latitude = "25.761681",
+//				longitude = "-80.191788",
+//				apiKey = BuildConfig.API_KEY
+//			).dataOrNull
+//
+//			val uvIndex: Int? = response?.current?.uvi?.roundToInt()
 
-			val uvIndex: Int? = response?.current?.uvi?.roundToInt()
-
-			UvIndexWidget.send(this@MainActivity, uvIndex ?: -1)
+//			UvIndexWidget.send(this@MainActivity, uvIndex ?: -1)
 		}
 	}
 }
