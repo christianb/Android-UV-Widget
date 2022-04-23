@@ -10,9 +10,11 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.lifecycleScope
 import com.bunk.uvindex.api.OpenWeatherMapApi
 import com.bunk.uvindex.api.WeatherData
 import com.bunk.uvindex.ui.theme.UvIndexTheme
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import retrofit2.Call
 import retrofit2.Callback
@@ -38,19 +40,16 @@ class MainActivity : ComponentActivity() {
 	override fun onStart() {
 		super.onStart()
 
-		openWeatherMapApi.getData(
-			latitude = "52.520008",
-			longitude = "13.404954",
-			apiKey = BuildConfig.API_KEY
-		).enqueue(object : Callback<WeatherData> {
-			override fun onResponse(call: Call<WeatherData>, response: Response<WeatherData>) {
-				Timber.d("onResponse")
-			}
+		lifecycleScope.launch {
+			val response: Response<WeatherData> = openWeatherMapApi.getData(
+				latitude = "52.520008",
+				longitude = "13.404954",
+				apiKey = BuildConfig.API_KEY
+			)
 
-			override fun onFailure(call: Call<WeatherData>, t: Throwable) {
-				Timber.e("onFailure")
-			}
-		})
+			Timber.d("${response.code()}")
+			Timber.d("UV-Index: ${response.body()?.current?.uvi}")
+		}
 	}
 }
 
