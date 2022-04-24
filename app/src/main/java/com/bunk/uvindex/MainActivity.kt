@@ -49,8 +49,8 @@ class MainActivity : ComponentActivity() {
 
 		lifecycleScope.launch {
 //			val response: WeatherData? = openWeatherMapApi.getData(
-//				latitude = "25.761681",
-//				longitude = "-80.191788",
+//				latitude = "52.520008",
+//				longitude = "13.404954",
 //				apiKey = BuildConfig.API_KEY
 //			).dataOrNull
 //

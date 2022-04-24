@@ -63,7 +63,7 @@ class UvIndexWidget : AppWidgetProvider(), KoinComponent {
 	private fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray, uvIndex: Int) {
 		for (appWidgetId in appWidgetIds) {
 			val views = RemoteViews(context.packageName, R.layout.uv_index_widget)
-			views.setTextViewText(R.id.appwidget_text, "UV-Index: $uvIndex")
+			views.setTextViewText(R.id.appwidget_text, context.getString(R.string.appwidget_text, uvIndex))
 			Timber.d("updateWidget: $uvIndex")
 
 			// Instruct the widget manager to update the widget
