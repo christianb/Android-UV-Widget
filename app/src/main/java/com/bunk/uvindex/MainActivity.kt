@@ -13,15 +13,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
 import com.bunk.uvindex.api.OpenWeatherMapApi
 import com.bunk.uvindex.api.WeatherData
+import com.bunk.uvindex.location.LocationRepository
+import com.bunk.uvindex.permission.AppPermission
+import com.bunk.uvindex.permission.PermissionActivity
 import com.bunk.uvindex.ui.theme.UvIndexTheme
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import timber.log.Timber
 import kotlin.math.roundToInt
 
-class MainActivity : ComponentActivity() {
+class MainActivity : PermissionActivity() {
 
-	private val openWeatherMapApi: OpenWeatherMapApi by inject()
+	private val locationRepository: LocationRepository by inject()
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
@@ -33,11 +36,19 @@ class MainActivity : ComponentActivity() {
 				}
 			}
 		}
+
+		requestPermission(
+			AppPermission.ACCESS_FINE_LOCATION,
+			AppPermission.ACCESS_COARSE_LOCATION,
+			AppPermission.ACCESS_BACKGROUND_LOCATION
+		)
 	}
 
 	override fun onStart() {
 		super.onStart()
 		Timber.d("onStart")
+
+		Timber.d("location: ${locationRepository.getLocation()}")
 
 		// Miami
 		// latitude = "25.761681"

@@ -20,17 +20,19 @@ import kotlin.math.roundToInt
  */
 class UvIndexWidget : AppWidgetProvider(), KoinComponent {
 
-	private val weatherRepository: WeatherRepository = getKoin().get()
+	private val getWeatherUseCase: GetWeatherUseCase = getKoin().get()
 
 	override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
 		Timber.d("onUpdate")
 
 		CoroutineScope(Dispatchers.Main.immediate).launch {
-			val weatherData: WeatherData? = weatherRepository.getWeather(
-				latitude = "25.761681",
-				longitude = "-80.191788",
-				apiKey = BuildConfig.API_KEY
-			)
+//			val weatherData: WeatherData? = weatherRepository.getWeather(
+//				latitude = "25.761681",
+//				longitude = "-80.191788",
+//				apiKey = BuildConfig.API_KEY
+//			)
+
+			val weatherData = getWeatherUseCase.execute()
 			Timber.d("weatherData: $weatherData")
 
 			val uvIndex: Int = weatherData?.current?.uvi?.roundToInt() ?: -1

@@ -10,13 +10,12 @@ class WeatherRepository(
 	private val cache: Cache<WeatherData> = Cache()
 
 	suspend fun getWeather(
-		latitude: String,
-		longitude: String,
-		apiKey: String,
+		latitude: Double,
+		longitude: Double,
 	): WeatherData? {
 		Timber.d("getWeather")
 		if (cache.isStale()) {
-			val weatherData: WeatherData? = openWeatherMapApi.getWeather(latitude = latitude, longitude = longitude, apiKey).dataOrNull
+			val weatherData: WeatherData? = openWeatherMapApi.getWeather(latitude = latitude, longitude = longitude).dataOrNull
 			Timber.d("cache stale")
 			Timber.d("weatherData: $weatherData")
 			if (weatherData != null) cache.value = weatherData
