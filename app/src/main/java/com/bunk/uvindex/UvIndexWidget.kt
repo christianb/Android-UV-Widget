@@ -1,5 +1,6 @@
 package com.bunk.uvindex
 
+import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
@@ -10,7 +11,9 @@ import android.os.Build
 import android.widget.RemoteViews
 import androidx.annotation.ColorInt
 import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.bunk.uvindex.permission.AppPermission
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,12 +32,6 @@ class UvIndexWidget : AppWidgetProvider(), KoinComponent {
 		Timber.d("onUpdate")
 
 		CoroutineScope(Dispatchers.Main.immediate).launch {
-//			val weatherData: WeatherData? = weatherRepository.getWeather(
-//				latitude = "25.761681",
-//				longitude = "-80.191788",
-//				apiKey = BuildConfig.API_KEY
-//			)
-
 			val weatherData = getWeatherUseCase.execute()
 			Timber.d("weatherData: $weatherData")
 
@@ -46,10 +43,8 @@ class UvIndexWidget : AppWidgetProvider(), KoinComponent {
 		}
 	}
 
-
 	override fun onEnabled(context: Context) {
 		// Enter relevant functionality for when the first widget is created
-		Timber.d("onEnabled")
 	}
 
 	override fun onDisabled(context: Context) {
@@ -58,13 +53,6 @@ class UvIndexWidget : AppWidgetProvider(), KoinComponent {
 
 	override fun onReceive(context: Context, intent: Intent) {
 		super.onReceive(context, intent)
-
-//		val appWidgetManager = AppWidgetManager.getInstance(context)
-//		val componentName = ComponentName(context, UvIndexWidget::class.java)
-//		val appWidgetIds: IntArray = AppWidgetManager.getInstance(context).getAppWidgetIds(componentName)
-//
-//		val uvIndex = read(intent)
-//		updateAppWidget(context, appWidgetManager, appWidgetIds, uvIndex)
 	}
 
 	private fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray, uvIndex: Int) {
@@ -96,17 +84,21 @@ class UvIndexWidget : AppWidgetProvider(), KoinComponent {
 	companion object {
 		const val UV_INDEX = "uv_index_extra"
 
-		private fun createIntent(context: Context): Intent = Intent(context, UvIndexWidget::class.java).apply {
-			action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+		private fun createIntent(context: Context, action: String): Intent = Intent(context, UvIndexWidget::class.java).apply {
+			this.action = action
 			val ids = AppWidgetManager.getInstance(context).getAppWidgetIds(ComponentName(context.applicationContext, UvIndexWidget::class.java))
 			putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
 		}
 
 		fun send(context: Context, value: Int) {
-			val intent = createIntent(context).apply {
+			val intent = createIntent(context, action = AppWidgetManager.ACTION_APPWIDGET_UPDATE).apply {
 				putExtra(UV_INDEX, value)
 			}
 			context.sendBroadcast(intent)
+		}
+
+		fun update(context: Context) {
+			context.sendBroadcast(createIntent(context, action = AppWidgetManager.ACTION_APPWIDGET_UPDATE))
 		}
 
 		fun read(intent: Intent): Int = intent.getIntExtra(UV_INDEX, -1)
