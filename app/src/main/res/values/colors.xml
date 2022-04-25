@@ -13,7 +13,7 @@
     <color name="light_blue_900">#FF01579B</color>
 
     <!-- from: https://de.wikipedia.org/wiki/UV-Index -->
-    <color name="low">#C0FFA0</color>
+    <color name="low">#3EA72D</color>
     <color name="medium">#F8F040</color>
     <color name="high">#F87820</color>
     <color name="very_high">#D80020</color>
