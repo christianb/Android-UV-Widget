@@ -29,8 +29,8 @@ abstract class PermissionActivity : ComponentActivity(),
 		val showRationale = appPermissionResults.filter { it.permissionResult == PermissionResult.Denied.ShowRationale }
 
 		when {
-			doNotAskAgain.isNotEmpty() -> showGoToSettingsDialog()
 			showRationale.isNotEmpty() -> showAskPermissionsDialog(*showRationale.map { it.appPermission }.toTypedArray())
+			doNotAskAgain.isNotEmpty() -> showGoToSettingsDialog()
 			else -> {
 				// all permissions granted
 			}
@@ -52,10 +52,11 @@ abstract class PermissionActivity : ComponentActivity(),
 
 	private fun showAskPermissionsDialog(vararg appPermissions: AppPermission) {
 		AlertDialog.Builder(this)
-			.setTitle("Permission required")
-			.setMessage("Please grant permissions or the widget will not work")
-			.setPositiveButton("Ok") { _, _ ->
-				permissionHelper.requestPermissions(activity = this, *appPermissions)
+			.setTitle("Background Location")
+			.setMessage("Please select 'allow always' for location permission in settings.")
+			.setPositiveButton("Settings") { _, _ ->
+//				permissionHelper.requestPermissions(activity = this, *appPermissions)
+				goToSettings()
 			}
 			.setNegativeButton("No thanks") { _, _ ->
 				finish()

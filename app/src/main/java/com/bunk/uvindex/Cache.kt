@@ -2,7 +2,10 @@ package com.bunk.uvindex
 
 class Cache<T> {
 
-	private var updatedAt: Long? = null
+	var updatedAt: Long? = null
+		private set(value) {
+			field = value
+		}
 
 	var value: T? = null
 		set(value) {

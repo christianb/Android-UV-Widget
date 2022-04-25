@@ -13,13 +13,18 @@ class PermissionHelper(
 	private val listeners: MutableSet<Listener> = mutableSetOf()
 
 	fun requestPermissions(activity: Activity, vararg appPermissions: AppPermission) {
-		if (checkPermission(activity, *appPermissions)) {
-			val appPermissionResults: List<AppPermissionResult> = appPermissions.map {
-				AppPermissionResult(it, PermissionResult.Granted)
-			}
+//		if (checkPermission(activity, *appPermissions)) {
+//			val appPermissionResults: List<AppPermissionResult> = appPermissions.map {
+//				AppPermissionResult(it, PermissionResult.Granted)
+//			}
+//
+//			notifyPermissionResults(appPermissionResults)
+//			return
+//		}
 
-			notifyPermissionResults(appPermissionResults)
-			return
+		for (appPermission in appPermissions) {
+			val shouldShowRationale = ActivityCompat.shouldShowRequestPermissionRationale(activity, appPermission.androidPermission)
+			Timber.d("shouldShowRationale for ${appPermission.androidPermission} = $shouldShowRationale")
 		}
 
 		val permissionStrings = appPermissions.map { it.androidPermission }.toTypedArray()

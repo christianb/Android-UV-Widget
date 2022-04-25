@@ -5,9 +5,12 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
+import android.os.Build
 import android.widget.RemoteViews
-import com.bunk.uvindex.api.WeatherData
-import com.bunk.uvindex.api.WeatherRepository
+import androidx.annotation.ColorInt
+import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -43,6 +46,7 @@ class UvIndexWidget : AppWidgetProvider(), KoinComponent {
 		}
 	}
 
+
 	override fun onEnabled(context: Context) {
 		// Enter relevant functionality for when the first widget is created
 	}
@@ -64,13 +68,28 @@ class UvIndexWidget : AppWidgetProvider(), KoinComponent {
 
 	private fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray, uvIndex: Int) {
 		for (appWidgetId in appWidgetIds) {
-			val views = RemoteViews(context.packageName, R.layout.uv_index_widget)
-			views.setTextViewText(R.id.appwidget_text, context.getString(R.string.appwidget_text, uvIndex))
+			val remoteViews = RemoteViews(context.packageName, R.layout.uv_index_widget)
+			remoteViews.setTextViewText(R.id.appwidget_text, uvIndex.toString())
 			Timber.d("updateWidget: $uvIndex")
 
+			remoteViews.setImageViewResource(R.id.appwidget_imageview, R.drawable.uv_index_circular_background);
+			remoteViews.setInt(R.id.appwidget_imageview, "setColorFilter", mapUvIndexToColor(uvIndex, context))
+
 			// Instruct the widget manager to update the widget
-			appWidgetManager.updateAppWidget(appWidgetId, views)
+			appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
 		}
+	}
+
+	/**
+	 * from https://en.wikipedia.org/wiki/Ultraviolet_index
+	 */
+	@ColorInt
+	private fun mapUvIndexToColor(uvIndex: Int, context: Context): Int {
+		if (uvIndex <= 2) return ContextCompat.getColor(context, R.color.low)
+		if (uvIndex <= 5) return ContextCompat.getColor(context, R.color.medium)
+		if (uvIndex <= 7) return ContextCompat.getColor(context, R.color.high)
+		if (uvIndex <= 10) return ContextCompat.getColor(context, R.color.very_high)
+		return ContextCompat.getColor(context, R.color.extreme)
 	}
 
 	companion object {

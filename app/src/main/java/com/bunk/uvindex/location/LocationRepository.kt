@@ -14,8 +14,9 @@ class LocationRepository(
 ) {
 
 	fun getLocation(): Location? {
-		if (!PermissionHelper.checkPermission(applicationContext, AppPermission.ACCESS_COARSE_LOCATION, AppPermission.ACCESS_FINE_LOCATION)) {
-			throw IllegalAccessException("need permission")
+		if (!PermissionHelper.checkPermission(applicationContext, AppPermission.ACCESS_COARSE_LOCATION, AppPermission.ACCESS_BACKGROUND_LOCATION)) {
+			Timber.d("no permission given, return null")
+			return null
 		}
 
 		return getBestLocation()

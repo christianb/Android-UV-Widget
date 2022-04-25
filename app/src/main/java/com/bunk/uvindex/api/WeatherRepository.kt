@@ -7,7 +7,10 @@ class WeatherRepository(
 	private val openWeatherMapApi: OpenWeatherMapApi,
 ) {
 
+	// TODO does not take location into consideration...
 	private val cache: Cache<WeatherData> = Cache()
+
+	fun last(): Cache<WeatherData> = cache
 
 	suspend fun getWeather(
 		latitude: Double,
