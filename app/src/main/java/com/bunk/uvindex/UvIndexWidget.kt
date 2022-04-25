@@ -38,7 +38,7 @@ class UvIndexWidget : AppWidgetProvider(), KoinComponent {
 			val weatherData = getWeatherUseCase.execute()
 			Timber.d("weatherData: $weatherData")
 
-			val uvIndex: Int = weatherData?.current?.uvi?.roundToInt() ?: -1
+			val uvIndex: Int = weatherData?.current?.uvi?.roundToInt() ?: return@launch
 
 			for (appWidgetId in appWidgetIds) {
 				updateAppWidget(context, appWidgetManager, appWidgetIds, uvIndex)
@@ -49,6 +49,7 @@ class UvIndexWidget : AppWidgetProvider(), KoinComponent {
 
 	override fun onEnabled(context: Context) {
 		// Enter relevant functionality for when the first widget is created
+		Timber.d("onEnabled")
 	}
 
 	override fun onDisabled(context: Context) {
