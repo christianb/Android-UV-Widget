@@ -5,9 +5,8 @@ import android.content.Intent
 import com.bunk.uvindex.permission.AppPermission
 import com.bunk.uvindex.permission.AppPermissionResult
 import com.bunk.uvindex.permission.PermissionActivity
-import timber.log.Timber
 
-class MainActivity : PermissionActivity() {
+class ConfigurationActivity : PermissionActivity() {
 
 	override fun onStart() {
 		super.onStart()
@@ -25,7 +24,6 @@ class MainActivity : PermissionActivity() {
 			UvIndexWidget.update(context = this)
 			configurationResult()
 		}
-
 	}
 
 	private fun configurationResult() {
