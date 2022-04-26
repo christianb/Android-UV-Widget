@@ -29,7 +29,8 @@
         android:background="#00ffffff"
         android:contentDescription="@string/appwidget_text"
         android:text="2"
-        android:textColor="#CC000000"
-        android:textSize="24sp" />
+        android:textStyle="bold"
+        android:textColor="#000000"
+        android:textSize="22sp" />
 
 </FrameLayout>

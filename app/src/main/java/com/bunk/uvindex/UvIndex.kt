@@ -24,6 +24,10 @@ sealed class UvIndex(
 			else -> Unknown
 		}
 	}
+
+	override fun toString(): String {
+		return "UvIndex($value)"
+	}
 }
 
 @ColorRes
