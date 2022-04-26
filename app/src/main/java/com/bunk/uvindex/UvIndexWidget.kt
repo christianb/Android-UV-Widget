@@ -15,6 +15,7 @@ import com.bunk.uvindex.storage.UvEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import timber.log.Timber
 import java.time.Instant
@@ -36,38 +37,37 @@ class UvIndexWidget : AppWidgetProvider(), KoinComponent {
 		Timber.d("onUpdate")
 
 		CoroutineScope(Dispatchers.Main.immediate).launch {
-			// clean up DB
-			val nowInSeconds: Long = System.currentTimeMillis() / 1000
-			uvDao.delete(nowInSeconds)
 
-			// count elements in DB
-			val count: Int = uvDao.count(nowInSeconds)
-			Timber.d("$count entries in DB")
+			val closest: UvEntity? =  withContext(Dispatchers.IO) {
+				// clean up DB
+				val nowInSeconds: Long = System.currentTimeMillis() / 1000
+				uvDao.delete(nowInSeconds)
 
-			if (count <= THRESHOLD_MAKING_NEW_REQUEST) {
-				Timber.i("too few elements in DB, make request")
+				// count elements in DB
+				val count: Int = uvDao.count(nowInSeconds)
+				Timber.d("$count entries in DB")
 
-				val weatherData = getWeatherUseCase.execute()
-				Timber.d("weatherData: $weatherData")
+				if (count <= THRESHOLD_MAKING_NEW_REQUEST) {
+					Timber.i("too few elements in DB, make request")
 
-				// insert response in DB
-				val uvEntities: List<UvEntity> = weatherData?.hourly?.map { it.toUvEntity() } ?: emptyList()
-				uvDao.insertAll(uvEntities)
+					val weatherData = getWeatherUseCase.execute()
+					Timber.d("weatherData: $weatherData")
+
+					// insert response in DB
+					val uvEntities: List<UvEntity> = weatherData?.hourly?.map { it.toUvEntity() } ?: emptyList()
+					uvDao.insertAll(uvEntities)
+				}
+
+				// get all entries from DB
+				val all: List<UvEntity> = uvDao.getAll(nowInSeconds)
+				Timber.d("all = $all")
+
+				getClosest(all, nowInSeconds)
 			}
 
-			// get all entries from DB
-			val all: List<UvEntity> = uvDao.getAll(nowInSeconds)
-			Timber.d("all = $all")
+			Timber.d("closestToNow = $closest (date: ${toDate(closest?.dt)})")
 
-			val closestToNow: UvEntity? = getClosestNotPast(all, nowInSeconds)
-			Timber.d("closestToNow = $closestToNow (date: ${toDate(closestToNow?.dt)})")
-
-//			Timber.d("epoch in seconds: ${System.currentTimeMillis() / 1000}")
-//			Timber.d("epoch in date: ${toDate(System.currentTimeMillis() / 1000)}")
-//			for (hourly in weatherData?.hourly ?: emptyList()) {
-//				Timber.d("hour: ${toDate(hourly.dt)}, uvi: ${hourly.uvi} (rounded: ${hourly.uvi.roundToInt()})")
-//			}
-			val uvIndex: Int = closestToNow?.uvIndex?.roundToInt() ?: return@launch
+			val uvIndex: Int = closest?.uvIndex?.roundToInt() ?: return@launch
 
 			for (appWidgetId in appWidgetIds) {
 				updateAppWidget(context, appWidgetManager, appWidgetIds, uvIndex)
@@ -75,14 +75,14 @@ class UvIndexWidget : AppWidgetProvider(), KoinComponent {
 		}
 	}
 
-	private fun getClosestNotPast(all: List<UvEntity>, nowInSeconds: Long): UvEntity? {
+	private fun getClosest(all: List<UvEntity>, nowInSeconds: Long): UvEntity? {
 		var closest: UvEntity? = null
-		val filtered = all.filter { it.dt >= nowInSeconds }
-		for (element in filtered) {
+		for (element in all) {
 			if (closest == null || element.dt - nowInSeconds < closest.dt - nowInSeconds) {
 				closest = element
 			}
 		}
+
 		return closest
 	}
 

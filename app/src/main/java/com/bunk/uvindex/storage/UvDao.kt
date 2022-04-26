@@ -14,7 +14,7 @@ interface UvDao {
 	@Insert
 	suspend fun insertAll(uvEntities: List<UvEntity>)
 
-	@Query("DELETE FROM UvEntity WHERE dt < :nowInSeconds")
+	@Query("DELETE FROM UvEntity WHERE dt < (:nowInSeconds - 1800)")
 	suspend fun delete(nowInSeconds: Long)
 
 	@Query("SELECT COUNT(dt) FROM UvEntity WHERE dt > :nowInSeconds")
