@@ -1,24 +1,27 @@
 package com.bunk.uvindex
 
-import android.app.PendingIntent
+import android.annotation.SuppressLint
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
-import android.os.Build
 import android.widget.RemoteViews
 import androidx.annotation.ColorInt
-import androidx.annotation.RequiresApi
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.bunk.uvindex.permission.AppPermission
+import com.bunk.uvindex.mapper.toUvEntity
+import com.bunk.uvindex.storage.UvDao
+import com.bunk.uvindex.storage.UvEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import org.koin.core.component.KoinComponent
+import timber.log.Timber
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.util.*
 import kotlin.math.roundToInt
 
 /**
@@ -27,20 +30,60 @@ import kotlin.math.roundToInt
 class UvIndexWidget : AppWidgetProvider(), KoinComponent {
 
 	private val getWeatherUseCase: GetWeatherUseCase = getKoin().get()
+	private val uvDao: UvDao = getKoin().get()
 
 	override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
 		Timber.d("onUpdate")
 
 		CoroutineScope(Dispatchers.Main.immediate).launch {
-			val weatherData = getWeatherUseCase.execute()
-			Timber.d("weatherData: $weatherData")
+			// clean up DB
+			val nowInSeconds: Long = System.currentTimeMillis() / 1000
+			uvDao.delete(nowInSeconds)
 
-			val uvIndex: Int = weatherData?.current?.uvi?.roundToInt() ?: return@launch
+			// count elements in DB
+			val count: Int = uvDao.count(nowInSeconds)
+			Timber.d("$count entries in DB")
+
+			if (count <= THRESHOLD_MAKING_NEW_REQUEST) {
+				Timber.i("too few elements in DB, make request")
+
+				val weatherData = getWeatherUseCase.execute()
+				Timber.d("weatherData: $weatherData")
+
+				// insert response in DB
+				val uvEntities: List<UvEntity> = weatherData?.hourly?.map { it.toUvEntity() } ?: emptyList()
+				uvDao.insertAll(uvEntities)
+			}
+
+			// get all entries from DB
+			val all: List<UvEntity> = uvDao.getAll(nowInSeconds)
+			Timber.d("all = $all")
+
+			val closestToNow: UvEntity? = getClosestNotPast(all, nowInSeconds)
+			Timber.d("closestToNow = $closestToNow (date: ${toDate(closestToNow?.dt)})")
+
+//			Timber.d("epoch in seconds: ${System.currentTimeMillis() / 1000}")
+//			Timber.d("epoch in date: ${toDate(System.currentTimeMillis() / 1000)}")
+//			for (hourly in weatherData?.hourly ?: emptyList()) {
+//				Timber.d("hour: ${toDate(hourly.dt)}, uvi: ${hourly.uvi} (rounded: ${hourly.uvi.roundToInt()})")
+//			}
+			val uvIndex: Int = closestToNow?.uvIndex?.roundToInt() ?: return@launch
 
 			for (appWidgetId in appWidgetIds) {
 				updateAppWidget(context, appWidgetManager, appWidgetIds, uvIndex)
 			}
 		}
+	}
+
+	private fun getClosestNotPast(all: List<UvEntity>, nowInSeconds: Long): UvEntity? {
+		var closest: UvEntity? = null
+		val filtered = all.filter { it.dt >= nowInSeconds }
+		for (element in filtered) {
+			if (closest == null || element.dt - nowInSeconds < closest.dt - nowInSeconds) {
+				closest = element
+			}
+		}
+		return closest
 	}
 
 	override fun onEnabled(context: Context) {
@@ -74,15 +117,23 @@ class UvIndexWidget : AppWidgetProvider(), KoinComponent {
 	 */
 	@ColorInt
 	private fun mapUvIndexToColor(uvIndex: Int, context: Context): Int {
-		if (uvIndex <= 2) return ContextCompat.getColor(context, R.color.low)
-		if (uvIndex <= 5) return ContextCompat.getColor(context, R.color.medium)
-		if (uvIndex <= 7) return ContextCompat.getColor(context, R.color.high)
-		if (uvIndex <= 10) return ContextCompat.getColor(context, R.color.very_high)
-		return ContextCompat.getColor(context, R.color.extreme)
+		val uvColor = uvColor(UvIndex.from(uvIndex))
+		return ContextCompat.getColor(context, uvColor)
+	}
+
+	@SuppressLint("NewApi")
+	private fun toDate(unixTime: Long?): String { // TODO set minSDK to 26
+		unixTime ?: return "null"
+		val instant: Instant = Instant.ofEpochSecond(unixTime)
+		val zoneId: ZoneId = TimeZone.getDefault().toZoneId()
+		val zonedDateTime: ZonedDateTime = instant.atZone(zoneId)
+		val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-uuuu hh:mm a")
+		return zonedDateTime.format(formatter)
 	}
 
 	companion object {
 		const val UV_INDEX = "uv_index_extra"
+		const val THRESHOLD_MAKING_NEW_REQUEST = 12
 
 		private fun createIntent(context: Context, action: String): Intent = Intent(context, UvIndexWidget::class.java).apply {
 			this.action = action

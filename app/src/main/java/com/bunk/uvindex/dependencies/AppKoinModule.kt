@@ -9,6 +9,8 @@ import com.bunk.uvindex.api.RetrofitConfiguration
 import com.bunk.uvindex.api.WeatherRepository
 import com.bunk.uvindex.location.LocationRepository
 import com.bunk.uvindex.permission.PermissionHelper
+import com.bunk.uvindex.storage.AppDatabase
+import com.bunk.uvindex.storage.UvDao
 import org.koin.android.ext.koin.androidApplication
 import org.koin.dsl.module
 import retrofit2.Retrofit
@@ -35,4 +37,8 @@ val appModule = module {
 
 	// Permissions
 	factory<PermissionHelper> { PermissionHelper() }
+
+	// Room
+	single<AppDatabase> { AppDatabase.build(applicationContext = androidApplication()) }
+	single<UvDao> { get<AppDatabase>().uvDao() }
 }

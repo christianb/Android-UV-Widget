@@ -12,9 +12,10 @@
     <color name="light_blue_600">#FF039BE5</color>
     <color name="light_blue_900">#FF01579B</color>
 
-    <!-- from: https://de.wikipedia.org/wiki/UV-Index -->
+    <!-- https://de.wikipedia.org/wiki/UV-Index -->
+    <!-- https://www.theweathernetwork.com/en/city/de/berlin/berlin/uv -->
     <color name="low">#3EA72D</color>
-    <color name="medium">#F8F040</color>
+    <color name="moderate">#F8F040</color>
     <color name="high">#F87820</color>
     <color name="very_high">#D80020</color>
     <color name="extreme">#A80080</color>
