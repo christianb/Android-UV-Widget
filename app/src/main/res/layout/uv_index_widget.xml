@@ -4,14 +4,22 @@
     android:layout_width="50dp"
     android:layout_height="50dp"
     android:background="#00ffffff"
+    tools:background="@color/black"
     android:theme="@style/Theme.UvIndex.AppWidgetContainer">
 
     <ImageView
-        android:id="@+id/appwidget_imageview"
+        android:id="@+id/appwidget_background"
         android:padding="1dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/uv_index_circular_background" />
+        android:src="@drawable/uv_index_circular_background_light" />
+
+    <ImageView
+        android:id="@+id/appwidget_imageview"
+        android:layout_margin="2dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/uv_index_circular_background" />
 
     <TextView
         android:id="@+id/appwidget_text"

@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
-import com.bunk.uvindex.storage.database.UvDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -17,10 +16,10 @@ import timber.log.Timber
 /**
  * Implementation of App Widget functionality.
  */
-class UvIndexWidget : AppWidgetProvider(), KoinComponent {
+class UvIndexWidget : AppWidgetProvider(),
+					  KoinComponent {
 
 	private val getCurrentUvIndexUseCase: GetCurrentUvIndexUseCase = getKoin().get()
-	private val uvDao: UvDao = getKoin().get()
 
 	override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
 		Timber.d("onUpdate")
