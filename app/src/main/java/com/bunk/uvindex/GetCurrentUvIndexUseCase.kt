@@ -24,11 +24,11 @@ class GetCurrentUvIndexUseCase(
 
 	suspend fun execute(): UvIndex = withContext(Dispatchers.IO) { // TODO does room require going of the main thread?
 		// clean up DB
-		val nowInSeconds: Long = Instant.now().epochSecond
-		uvRepository.deleteOlderThan(nowInSeconds)
+		val now = Instant.now()
+		uvRepository.deleteOlderThan(now)
 
 		// count elements in DB
-		val count: Int = uvRepository.count(nowInSeconds)
+		val count: Int = uvRepository.count(now)
 		Timber.d("$count entries in DB")
 
 		if (count <= THRESHOLD_MAKING_NEW_REQUEST) {
@@ -43,10 +43,10 @@ class GetCurrentUvIndexUseCase(
 		}
 
 		// get all entries from DB
-		val all: List<UvEntity> = uvRepository.getAll(nowInSeconds)
+		val all: List<UvEntity> = uvRepository.getAll(now)
 		Timber.d("all = $all")
 
-		val closest: UvEntity? = getClosest(all, nowInSeconds)
+		val closest: UvEntity? = getClosest(all, now)
 		Timber.d("closestToNow = $closest (date: ${toDate(closest?.dt)})")
 
 		return@withContext UvIndex.from(closest?.uvIndex?.roundToInt())
@@ -68,8 +68,10 @@ class GetCurrentUvIndexUseCase(
 		return Instant.ofEpochSecond(epochSeconds).atZone(zoneId).format(formatter)
 	}
 
-	private fun getClosest(all: List<UvEntity>, nowInSeconds: Long): UvEntity? {
+	private fun getClosest(all: List<UvEntity>, now: Instant): UvEntity? {
 		var closest: UvEntity? = null
+		val nowInSeconds = now.epochSecond
+
 		for (element in all) {
 			if (closest == null || element.dt - nowInSeconds < closest.dt - nowInSeconds) {
 				closest = element

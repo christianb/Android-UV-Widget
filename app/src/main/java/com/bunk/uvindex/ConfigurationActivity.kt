@@ -27,10 +27,9 @@ class ConfigurationActivity : PermissionActivity() {
 	}
 
 	private fun configurationResult() {
-		var appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
 		val extras = intent.extras;
 		if (extras != null) {
-			appWidgetId = extras.getInt(
+			val appWidgetId = extras.getInt(
 				AppWidgetManager.EXTRA_APPWIDGET_ID,
 				AppWidgetManager.INVALID_APPWIDGET_ID);
 
