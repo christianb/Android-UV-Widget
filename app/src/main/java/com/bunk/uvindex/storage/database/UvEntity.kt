@@ -1,4 +1,4 @@
-package com.bunk.uvindex.storage
+package com.bunk.uvindex.storage.database
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

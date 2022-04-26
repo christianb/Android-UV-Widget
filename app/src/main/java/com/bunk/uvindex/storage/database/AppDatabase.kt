@@ -1,4 +1,4 @@
-package com.bunk.uvindex.storage
+package com.bunk.uvindex.storage.database
 
 import android.content.Context
 import androidx.room.Database
@@ -10,7 +10,7 @@ abstract class AppDatabase : RoomDatabase() {
 	abstract fun uvDao(): UvDao
 
 	companion object {
-		fun build(applicationContext: Context):AppDatabase {
+		fun build(applicationContext: Context): AppDatabase {
 			return Room.databaseBuilder(
 				applicationContext,
 				AppDatabase::class.java,

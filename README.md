@@ -1,5 +1,5 @@
 # UV Index Widget
-This app provides a widget diplaying the current UV-Index in your city.
+This app provides a widget displaying the current UV-Index at your location.
 
 ## Reference
 * [OpenWeatherMap](https://openweathermap.org/api/one-call-api)
