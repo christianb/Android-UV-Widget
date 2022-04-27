@@ -1,5 +1,7 @@
 package com.bunk.uvindex
 
+import android.app.PendingIntent
+import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
@@ -41,6 +43,10 @@ class UvIndexWidget : AppWidgetProvider(),
 
 	override fun onReceive(context: Context, intent: Intent) {
 		super.onReceive(context, intent)
+
+		if (intent.action == ACTION_CLICK) {
+			update(context)
+		}
 	}
 
 	private fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray, uvIndex: UvIndex) {
@@ -55,13 +61,23 @@ class UvIndexWidget : AppWidgetProvider(),
 			remoteViews.setImageViewResource(R.id.appwidget_imageview, R.drawable.uv_index_circular_background)
 			remoteViews.setInt(R.id.appwidget_imageview, "setColorFilter", ContextCompat.getColor(context, uvColor(uvIndex)))
 
+			remoteViews.setOnClickPendingIntent(R.id.appwidget_imageview, createOnClickPendingIntent(context, ACTION_CLICK))
+
 			// Instruct the widget manager to update the widget
 			appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
 		}
 	}
 
+	private fun createOnClickPendingIntent(context: Context, action: String): PendingIntent {
+		val intent = Intent(context, UvIndexWidget::class.java).apply {
+			this.action = action
+		}
+		return PendingIntent.getBroadcast(context, 0, intent, FLAG_IMMUTABLE)
+	}
+
 	companion object {
-		const val UV_INDEX = "uv_index_extra"
+		private const val UV_INDEX = "uv_index_extra"
+		private const val ACTION_CLICK = "uvIndexWidget_onClick"
 
 		private fun createIntent(context: Context, action: String): Intent = Intent(context, UvIndexWidget::class.java).apply {
 			this.action = action
@@ -77,7 +93,7 @@ class UvIndexWidget : AppWidgetProvider(),
 		}
 
 		fun update(context: Context) {
-//			context.sendBroadcast(createIntent(context, action = AppWidgetManager.ACTION_APPWIDGET_UPDATE))
+			context.sendBroadcast(createIntent(context, action = AppWidgetManager.ACTION_APPWIDGET_UPDATE))
 		}
 
 		fun read(intent: Intent): Int = intent.getIntExtra(UV_INDEX, -1)
