@@ -7,7 +7,7 @@ import androidx.room.Query
 @Dao
 interface UvDao {
 
-	@Query("SELECT * FROM UvEntity WHERE dt > :nowInSeconds")
+	@Query("SELECT * FROM UvEntity WHERE dt > :nowInSeconds ORDER BY dt ASC")
 	suspend fun getAll(nowInSeconds: Long): List<UvEntity>
 
 	@Insert
@@ -15,6 +15,9 @@ interface UvDao {
 
 	@Query("DELETE FROM UvEntity WHERE dt < (:nowInSeconds)")
 	suspend fun delete(nowInSeconds: Long)
+
+	@Query("DELETE FROM UvEntity")
+	suspend fun deleteAll()
 
 	@Query("SELECT COUNT(dt) FROM UvEntity WHERE dt > :nowInSeconds")
 	suspend fun count(nowInSeconds: Long): Int

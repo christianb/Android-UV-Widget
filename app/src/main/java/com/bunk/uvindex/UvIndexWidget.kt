@@ -77,7 +77,7 @@ class UvIndexWidget : AppWidgetProvider(),
 		}
 
 		fun update(context: Context) {
-			context.sendBroadcast(createIntent(context, action = AppWidgetManager.ACTION_APPWIDGET_UPDATE))
+//			context.sendBroadcast(createIntent(context, action = AppWidgetManager.ACTION_APPWIDGET_UPDATE))
 		}
 
 		fun read(intent: Intent): Int = intent.getIntExtra(UV_INDEX, -1)

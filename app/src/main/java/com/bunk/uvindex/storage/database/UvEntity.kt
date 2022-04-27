@@ -7,4 +7,6 @@ import androidx.room.PrimaryKey
 data class UvEntity(
 	@PrimaryKey val dt: Long,
 	val uvIndex: Double,
+	val longitude: Double,
+	val latitude: Double
 )

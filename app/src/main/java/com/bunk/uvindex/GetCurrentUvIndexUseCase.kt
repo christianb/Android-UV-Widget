@@ -4,6 +4,7 @@ import android.location.Location
 import com.bunk.uvindex.api.WeatherData
 import com.bunk.uvindex.api.WeatherRepository
 import com.bunk.uvindex.location.LocationRepository
+import com.bunk.uvindex.mapper.getLocation
 import com.bunk.uvindex.mapper.toUvEntity
 import com.bunk.uvindex.storage.database.UvEntity
 import com.bunk.uvindex.storage.UvRepository
@@ -23,41 +24,54 @@ class GetCurrentUvIndexUseCase(
 ) {
 
 	suspend fun execute(): UvIndex = withContext(Dispatchers.IO) { // TODO does room require going of the main thread?
-		// clean up DB
+		// clean up DB, delete past elements
 		val now = Instant.now()
 		uvRepository.deleteOlderThan(now)
 
-		// count elements in DB
+		// find the element that is closest (30min) to now
+		var closestToNowUvEntity: UvEntity? = uvRepository.getClosestTo(now)
+		Timber.d("min = $closestToNowUvEntity (date = ${toDate(closestToNowUvEntity?.dt)})")
+
+		val location: Location? = locationRepository.getLocation()
+		if (didLocationExceedThreshold(location, otherLocation = closestToNowUvEntity?.getLocation())) {
+			// if the phone moved too far, delete all entries in DB
+			uvRepository.deleteAll()
+			closestToNowUvEntity = null
+			Timber.d("device move more than $MIN_DISTANCE_IN_METER meter")
+		}
+
 		val count: Int = uvRepository.count(now)
 		Timber.d("$count entries in DB")
 
+		// if there are less than required elements available make a new request
 		if (count <= THRESHOLD_MAKING_NEW_REQUEST) {
 			Timber.i("too few elements in DB, make request")
 
-			val weatherData = fetchWeather()
+			val weatherData: WeatherData? = fetchWeather(location)
 			Timber.d("weatherData: $weatherData")
 
 			// insert response in DB
-			val uvEntities: List<UvEntity> = weatherData?.hourly?.map { it.toUvEntity() } ?: emptyList()
+			val uvEntities: List<UvEntity> =
+				weatherData?.hourly?.map { it.toUvEntity(longitude = weatherData.lon, latitude = weatherData.lat) } ?: emptyList()
 			uvRepository.insertAll(uvEntities)
 		}
 
-		// get all entries from DB
-		val all: List<UvEntity> = uvRepository.getAll(now)
-		Timber.d("all = $all")
-
-		val closest: UvEntity? = getClosest(all, now)
-		Timber.d("closestToNow = $closest (date: ${toDate(closest?.dt)})")
-
-		return@withContext UvIndex.from(closest?.uvIndex?.roundToInt())
-
+		val uvIndex = closestToNowUvEntity?.uvIndex ?: uvRepository.getClosestTo(now)?.uvIndex
+		return@withContext UvIndex.from(uvIndex?.roundToInt())
 	}
 
-	private suspend fun fetchWeather(): WeatherData? {
-		val location: Location = locationRepository.getLocation()?.also {
-			Timber.d("location: $it")
-		} ?: return null
+	private fun didLocationExceedThreshold(location: Location?, otherLocation: Location?): Boolean {
+		return distanceInMeters(location, otherLocation) > MIN_DISTANCE_IN_METER
+	}
 
+	private fun distanceInMeters(location: Location?, otherLocation: Location?): Int {
+		return if (location != null && otherLocation != null) {
+			location.distanceTo(otherLocation).roundToInt()
+		} else -1
+	}
+
+	private suspend fun fetchWeather(location: Location?): WeatherData? {
+		location ?: return null
 		return weatherRepository.getWeather(latitude = location.latitude, longitude = location.longitude)
 	}
 
@@ -68,20 +82,8 @@ class GetCurrentUvIndexUseCase(
 		return Instant.ofEpochSecond(epochSeconds).atZone(zoneId).format(formatter)
 	}
 
-	private fun getClosest(all: List<UvEntity>, now: Instant): UvEntity? {
-		var closest: UvEntity? = null
-		val nowInSeconds = now.epochSecond
-
-		for (element in all) {
-			if (closest == null || element.dt - nowInSeconds < closest.dt - nowInSeconds) {
-				closest = element
-			}
-		}
-
-		return closest
-	}
-
 	companion object {
 		private const val THRESHOLD_MAKING_NEW_REQUEST = 24
+		private const val MIN_DISTANCE_IN_METER = 10_000
 	}
 }
