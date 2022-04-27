@@ -9,9 +9,10 @@ import com.bunk.uvindex.permission.PermissionHelper
 import timber.log.Timber
 
 class LocationRepository(
-	private val locationManager: LocationManager,
 	private val applicationContext: Context,
 ) {
+
+	private val locationManager = applicationContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
 	fun getLocation(): Location? {
 		if (!PermissionHelper.checkPermission(applicationContext, AppPermission.ACCESS_COARSE_LOCATION, AppPermission.ACCESS_BACKGROUND_LOCATION)) {

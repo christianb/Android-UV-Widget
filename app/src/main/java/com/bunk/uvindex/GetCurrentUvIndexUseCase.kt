@@ -44,16 +44,14 @@ class GetCurrentUvIndexUseCase(
 		Timber.d("$count entries in DB")
 
 		// if there are less than required elements available make a new request
-		if (count <= THRESHOLD_MAKING_NEW_REQUEST) {
-			Timber.i("too few elements in DB, make request")
-
+		if (location != null && count <= THRESHOLD_MAKING_NEW_REQUEST
+		) {
 			val weatherData: WeatherData? = fetchWeather(location)
-			Timber.d("weatherData: $weatherData")
-
-			// insert response in DB
-			val uvEntities: List<UvEntity> =
-				weatherData?.hourly?.map { it.toUvEntity(longitude = weatherData.lon, latitude = weatherData.lat) } ?: emptyList()
-			uvRepository.insertAll(uvEntities)
+			if (weatherData != null) {
+				uvRepository.deleteAll()
+				val uvEntities: List<UvEntity> = weatherData.hourly.map { it.toUvEntity(longitude = weatherData.lon, latitude = weatherData.lat) }
+				uvRepository.insertAll(uvEntities)
+			}
 		}
 
 		val uvIndex = closestToNowUvEntity?.uvIndex ?: uvRepository.getClosestTo(now)?.uvIndex
@@ -70,8 +68,7 @@ class GetCurrentUvIndexUseCase(
 		} else -1
 	}
 
-	private suspend fun fetchWeather(location: Location?): WeatherData? {
-		location ?: return null
+	private suspend fun fetchWeather(location: Location): WeatherData? {
 		return weatherRepository.getWeather(latitude = location.latitude, longitude = location.longitude)
 	}
 
@@ -83,7 +80,7 @@ class GetCurrentUvIndexUseCase(
 	}
 
 	companion object {
-		private const val THRESHOLD_MAKING_NEW_REQUEST = 24
+		private const val THRESHOLD_MAKING_NEW_REQUEST = 12
 		private const val MIN_DISTANCE_IN_METER = 10_000
 	}
 }
