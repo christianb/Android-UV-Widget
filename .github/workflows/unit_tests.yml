@@ -38,10 +38,9 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: 11
+
+      # https://github.com/gradle/gradle-build-action
       - uses: gradle/gradle-build-action@v2
         with:
           gradle-version: current
-          wrapper-cache-enabled: true
-          dependencies-cache-enabled: true
-          configuration-cache-enabled: true
           arguments: testDebugUnitTest
