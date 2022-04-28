@@ -1,5 +1,7 @@
 package com.bunk.uvindex.dependencies
 
+import android.content.Context
+import android.location.LocationManager
 import com.bunk.uvindex.GetCurrentUvIndexUseCase
 import com.bunk.uvindex.api.OpenWeatherMapApi
 import com.bunk.uvindex.api.RetrofitConfiguration
@@ -15,13 +17,21 @@ import retrofit2.Retrofit
 
 val appModule = module {
 
+	// System Service
+	single<LocationManager> { androidApplication().getSystemService(Context.LOCATION_SERVICE) as LocationManager }
+
 	// Retrofit
 	single<Retrofit> { RetrofitConfiguration.retrofit }
 	single<OpenWeatherMapApi> { get<Retrofit>().create(OpenWeatherMapApi::class.java) }
 
 	// Repositories
 	single<WeatherRepository> { WeatherRepository(openWeatherMapApi = get()) }
-	factory<LocationRepository> { LocationRepository(applicationContext = androidApplication()) }
+	factory<LocationRepository> {
+		LocationRepository(
+			applicationContext = androidApplication(),
+			locationManager = get(),
+		)
+	}
 	factory<UvRepository> { UvRepository(dao = get()) }
 
 	// UseCases
