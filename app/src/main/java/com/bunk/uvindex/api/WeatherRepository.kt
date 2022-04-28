@@ -1,7 +1,5 @@
 package com.bunk.uvindex.api
 
-import timber.log.Timber
-
 class WeatherRepository(
 	private val openWeatherMapApi: OpenWeatherMapApi,
 ) {
@@ -10,9 +8,6 @@ class WeatherRepository(
 		latitude: Double,
 		longitude: Double,
 	): WeatherData? {
-		Timber.d("getWeather")
-		return openWeatherMapApi.getWeather(latitude = latitude, longitude = longitude).dataOrNull?.also {
-			Timber.d("weather: $it")
-		}
+		return openWeatherMapApi.getWeather(latitude = latitude, longitude = longitude).dataOrNull
 	}
 }

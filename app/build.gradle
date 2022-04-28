@@ -5,7 +5,11 @@ plugins {
 }
 
 Properties properties = new Properties()
-properties.load(project.rootProject.file("local.properties").newDataInputStream())
+def localPropertiesFileName='local.properties'
+def localPropertiesFile = project.rootProject.file(localPropertiesFileName)
+if (localPropertiesFile.canRead()) {
+    properties.load(localPropertiesFile.newDataInputStream())
+}
 
 android {
     compileSdk 31
@@ -22,7 +26,7 @@ android {
             useSupportLibrary true
         }
 
-        buildConfigField "String", "API_KEY", properties.getProperty("OPEN_WEATHER_MAP_API_KEY", "")
+        buildConfigField "String", "API_KEY", properties.getProperty("OPEN_WEATHER_MAP_API_KEY", "\"\"")
     }
 
     buildTypes {
@@ -32,11 +36,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = JavaVersion.VERSION_11
     }
     buildFeatures {
         viewBinding true
@@ -62,7 +66,11 @@ dependencies {
     kapt "androidx.room:room-compiler:$room_version"
 
     testImplementation "junit:junit:$junit_version"
+    testImplementation "io.mockk:mockk:$mockk_version"
+    testImplementation "org.assertj:assertj-core:$assertj_version"
+    testImplementation "org.robolectric:robolectric:$robolectric_version"
 
     androidTestImplementation "androidx.test.ext:junit:$test_ext_version"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_version"
+    androidTestImplementation "io.mockk:mockk-android:$mockk_version"
 }

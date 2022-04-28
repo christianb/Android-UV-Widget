@@ -10,9 +10,8 @@ import timber.log.Timber
 
 class LocationRepository(
 	private val applicationContext: Context,
+	private val locationManager: LocationManager
 ) {
-
-	private val locationManager = applicationContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
 	fun getLocation(): Location? {
 		if (!PermissionHelper.checkPermission(applicationContext, AppPermission.ACCESS_COARSE_LOCATION, AppPermission.ACCESS_BACKGROUND_LOCATION)) {
@@ -27,9 +26,8 @@ class LocationRepository(
 	private fun getBestLocation(): Location? {
 		var bestLocation: Location? = null
 		for (provider in locationManager.allProviders) {
-			Timber.d("try getting lastKnownLocation from provider: $provider")
 			val lastKnownLocation = locationManager.getLastKnownLocation(provider)
-			Timber.d("lastKnownLocation: $lastKnownLocation")
+			Timber.d("lastKnownLocation ($provider): $lastKnownLocation")
 
 			lastKnownLocation ?: continue
 
