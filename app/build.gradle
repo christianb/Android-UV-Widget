@@ -5,7 +5,11 @@ plugins {
 }
 
 Properties properties = new Properties()
-properties.load(project.rootProject.file("local.properties").newDataInputStream())
+def localPropertiesFileName='local.properties'
+def localPropertiesFile = project.rootProject.file(localPropertiesFileName)
+if (localPropertiesFile.canRead()) {
+    properties.load(localPropertiesFile.newDataInputStream())
+}
 
 android {
     compileSdk 31
@@ -22,7 +26,7 @@ android {
             useSupportLibrary true
         }
 
-        buildConfigField "String", "API_KEY", properties.getProperty("OPEN_WEATHER_MAP_API_KEY", "")
+        buildConfigField "String", "API_KEY", properties.getProperty("OPEN_WEATHER_MAP_API_KEY", "\"\"")
     }
 
     buildTypes {
