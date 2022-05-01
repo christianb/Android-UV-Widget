@@ -1,4 +1,4 @@
-name: Unit Test
+name: Lint
 
 on:
   pull_request:
@@ -23,4 +23,4 @@ jobs:
       - uses: gradle/gradle-build-action@v2
         with:
           gradle-version: current
-          arguments: testDebugUnitTest
+          arguments: lintDebug
