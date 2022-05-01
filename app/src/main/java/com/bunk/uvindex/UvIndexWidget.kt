@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinComponent
 import timber.log.Timber
 
@@ -22,9 +23,12 @@ class UvIndexWidget : AppWidgetProvider(),
 					  KoinComponent {
 
 	private val getCurrentUvIndexUseCase: GetCurrentUvIndexUseCase = getKoin().get()
+	private val uvIndexSharedPreferences: UvIndexSharedPreferences = getKoin().get()
 
 	override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
 		Timber.d("onUpdate")
+		val updateCounter = uvIndexSharedPreferences.get()
+		uvIndexSharedPreferences.set(updateCounter + 1)
 		CoroutineScope(Dispatchers.Main.immediate).launch {
 			val uvIndex: UvIndex = getCurrentUvIndexUseCase.execute()
 			for (appWidgetId in appWidgetIds) {
