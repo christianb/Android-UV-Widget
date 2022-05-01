@@ -1,10 +1,8 @@
 package com.bunk.uvindex
 
 import android.location.Location
-import com.bunk.uvindex.api.WeatherData
 import com.bunk.uvindex.api.WeatherRepository
 import com.bunk.uvindex.location.LocationRepository
-import com.bunk.uvindex.mapper.getLocation
 import com.bunk.uvindex.mapper.toUvEntity
 import com.bunk.uvindex.storage.database.UvEntity
 import com.bunk.uvindex.storage.UvRepository
@@ -12,9 +10,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.*
 import kotlin.math.roundToInt
 
 class GetCurrentUvIndexUseCase(

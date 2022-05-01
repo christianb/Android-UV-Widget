@@ -118,22 +118,6 @@ class UvDaoTest {
 		assertThat(actual).isEqualTo(3)
 	}
 
-	@Test
-	fun insertAll_should_overwrite_entity_when_adding_same_entity_again() {
-		val entity = createUvEntity(dt = 99)
-		val same = createUvEntity(dt = 99)
-
-		val actual = runBlocking {
-			classUnderTest.uvDao().insertAll(listOf(entity))
-			classUnderTest.uvDao().insertAll(listOf(same))
-			classUnderTest.uvDao().getAllUpcoming(nowInSeconds = 0)
-		}
-
-		assertThat(actual).hasSize(1)
-		assertThat(actual).containsExactly(same)
-		assertThat(entity).isEqualTo(same)
-	}
-
 	private fun createUvEntity(
 		dt: Long = 0,
 		uvIndex: Double = 0.0,

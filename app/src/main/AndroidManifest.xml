@@ -17,7 +17,7 @@
         android:theme="@style/Theme.UvIndex">
         <receiver
             android:name=".UvIndexWidget"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -34,6 +34,17 @@
             android:theme="@style/Theme.UvIndex">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".InfoActivity"
+            android:theme="@style/Theme.UvIndex"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>

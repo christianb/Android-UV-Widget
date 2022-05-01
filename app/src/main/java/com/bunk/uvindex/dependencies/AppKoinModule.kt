@@ -3,6 +3,7 @@ package com.bunk.uvindex.dependencies
 import android.content.Context
 import android.location.LocationManager
 import com.bunk.uvindex.GetCurrentUvIndexUseCase
+import com.bunk.uvindex.UvIndexSharedPreferences
 import com.bunk.uvindex.api.OpenWeatherMapApi
 import com.bunk.uvindex.api.RetrofitConfiguration
 import com.bunk.uvindex.api.WeatherRepository
@@ -49,4 +50,6 @@ val appModule = module {
 	// Room
 	single<AppDatabase> { AppDatabase.build(applicationContext = androidApplication()) }
 	single<UvDao> { get<AppDatabase>().uvDao() }
+
+	single { UvIndexSharedPreferences(context = androidApplication()) }
 }

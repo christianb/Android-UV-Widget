@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.UvIndex" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.UvIndex" parent="Theme.AppCompat.Light.NoActionBar" />
 
     <style name="Theme.UvIndex.AppWidgetContainerParent" parent="@android:style/Theme.DeviceDefault">
         <!-- Radius of the outer bound of widgets to make the rounded corners -->
