@@ -2,16 +2,17 @@ package com.bunk.uvindex
 
 import androidx.annotation.ColorRes
 
-sealed class UvIndex(
-	val value: Int
-) {
+sealed class UvIndex {
+	abstract val value: Int
 
-	class Low(value: Int) : UvIndex(value)
-	class Moderate(value: Int) : UvIndex(value)
-	class High(value: Int) : UvIndex(value)
-	class VeryHigh(value: Int) : UvIndex(value)
-	class Extreme(value: Int) : UvIndex(value)
-	object Unknown : UvIndex(-1)
+	data class Low(override val value: Int) : UvIndex()
+	data class Moderate(override val value: Int) : UvIndex()
+	data class High(override val value: Int) : UvIndex()
+	data class VeryHigh(override val value: Int) : UvIndex()
+	data class Extreme(override val value: Int) : UvIndex()
+	object Unknown : UvIndex() {
+		override val value: Int = -1
+	}
 
 	companion object {
 		fun from(value: Int?): UvIndex = when {

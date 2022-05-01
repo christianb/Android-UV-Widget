@@ -26,61 +26,57 @@ class GetCurrentUvIndexUseCase(
 	suspend fun execute(): UvIndex = withContext(Dispatchers.IO) { // TODO does room require going of the main thread?
 		// clean up DB, delete past elements
 		val now = Instant.now()
-		uvRepository.deleteOlderThan(now)
 
 		// find the element that is closest (30min) to now
-		var closestToNowUvEntity: UvEntity? = uvRepository.getClosestTo(now)
-		Timber.d("min = $closestToNowUvEntity (date = ${toDate(closestToNowUvEntity?.dt)})")
+//		val closestToNowUvEntity: UvEntity? = uvRepository.getClosestTo(now)
+//		Timber.d("min = $closestToNowUvEntity (date = ${toDate(closestToNowUvEntity?.dt)})")
 
 		val location: Location? = locationRepository.getLocation()
-		if (didLocationExceedThreshold(location, otherLocation = closestToNowUvEntity?.getLocation())) {
-			// if the phone moved too far, delete all entries in DB
-			uvRepository.deleteAll()
-			closestToNowUvEntity = null
-			Timber.d("device move more than $MIN_DISTANCE_IN_METER meter")
-		}
+//		if (didLocationExceedThreshold(location, otherLocation = closestToNowUvEntity?.getLocation())) {
+//			// if the phone moved too far, delete all entries in DB
+//			uvRepository.deleteAll()
+//			closestToNowUvEntity = null
+//			Timber.d("device move more than $MIN_DISTANCE_IN_METER meter")
+//		}
 
-		val count: Int = uvRepository.count(now)
+		val count: Int = uvRepository.countUpcoming(now)
 		Timber.d("$count entries in DB")
 
 		// if there are less than required elements available make a new request
-		if (location != null && count <= THRESHOLD_MAKING_NEW_REQUEST
-		) {
-			val weatherData: WeatherData? = fetchWeather(location)
-			if (weatherData != null) {
-				uvRepository.deleteAll()
-				val uvEntities: List<UvEntity> = weatherData.hourly.map { it.toUvEntity(longitude = weatherData.lon, latitude = weatherData.lat) }
-				uvRepository.insertAll(uvEntities)
-			}
-		}
+		if (location != null && count <= THRESHOLD_MAKING_NEW_REQUEST) fetchAndUpdateWeather(location)
 
-		val uvIndex = closestToNowUvEntity?.uvIndex ?: uvRepository.getClosestTo(now)?.uvIndex
+		val uvIndex = uvRepository.getClosestTo(now)?.uvIndex
 		return@withContext UvIndex.from(uvIndex?.roundToInt())
 	}
 
-	private fun didLocationExceedThreshold(location: Location?, otherLocation: Location?): Boolean {
-		return distanceInMeters(location, otherLocation) > MIN_DISTANCE_IN_METER
+//	private fun didLocationExceedThreshold(location: Location?, otherLocation: Location?): Boolean {
+//		return distanceInMeters(location, otherLocation) > MIN_DISTANCE_IN_METER
+//	}
+//
+//	private fun distanceInMeters(location: Location?, otherLocation: Location?): Int {
+//		return if (location != null && otherLocation != null) {
+//			location.distanceTo(otherLocation).roundToInt()
+//		} else -1
+//	}
+
+	private suspend fun fetchAndUpdateWeather(location: Location) {
+		weatherRepository.getWeather(latitude = location.latitude, longitude = location.longitude)?.also { weatherData ->
+			val longitude = weatherData.lon
+			val latitude = weatherData.lat
+			val uvEntities: List<UvEntity> = weatherData.hourly.map { it.toUvEntity(longitude = longitude, latitude = latitude) }
+			uvRepository.insertAll(uvEntities)
+		}
 	}
 
-	private fun distanceInMeters(location: Location?, otherLocation: Location?): Int {
-		return if (location != null && otherLocation != null) {
-			location.distanceTo(otherLocation).roundToInt()
-		} else -1
-	}
-
-	private suspend fun fetchWeather(location: Location): WeatherData? {
-		return weatherRepository.getWeather(latitude = location.latitude, longitude = location.longitude)
-	}
-
-	private fun toDate(epochSeconds: Long?): String {
-		epochSeconds ?: return "null"
-		val zoneId: ZoneId = TimeZone.getDefault().toZoneId()
-		val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-uuuu hh:mm a")
-		return Instant.ofEpochSecond(epochSeconds).atZone(zoneId).format(formatter)
-	}
+//	private fun toDate(epochSeconds: Long?): String {
+//		epochSeconds ?: return "null"
+//		val zoneId: ZoneId = TimeZone.getDefault().toZoneId()
+//		val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-uuuu hh:mm a")
+//		return Instant.ofEpochSecond(epochSeconds).atZone(zoneId).format(formatter)
+//	}
 
 	companion object {
 		private const val THRESHOLD_MAKING_NEW_REQUEST = 12
-		private const val MIN_DISTANCE_IN_METER = 10_000
+//		private const val MIN_DISTANCE_IN_METER = 10_000
 	}
 }
