@@ -53,11 +53,16 @@ class UvIndexWidget : AppWidgetProvider(),
 		}
 	}
 
-	private fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray, uvIndex: UvIndex) {
+	private fun updateAppWidget(
+		context: Context,
+		appWidgetManager: AppWidgetManager,
+		appWidgetIds: IntArray,
+		uvIndex: UvIndex,
+	) {
 		for (appWidgetId in appWidgetIds) {
 			val remoteViews = RemoteViews(context.packageName, R.layout.uv_index_widget)
 
-			val uvNumber: String = if (uvIndex == UvIndex.Unknown) "?" else uvIndex.value.toString()
+			val uvNumber: String = if (uvIndex == UvIndex.Unknown) "?" else uvIndex.rounded().toString()
 			remoteViews.setTextViewText(R.id.appwidget_text, uvNumber)
 
 			Timber.d("updateWidget: $uvIndex")

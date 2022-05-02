@@ -40,8 +40,8 @@ class GetCurrentUvIndexUseCase(
 		// if there are less than required elements available make a new request
 		if (location != null && count <= THRESHOLD_MAKING_NEW_REQUEST) fetchAndUpdateWeather(location)
 
-		val uvIndex = uvRepository.getClosestTo(now)?.uvIndex
-		return@withContext UvIndex.from(uvIndex?.roundToInt())
+		val uvIndex: Double? = uvRepository.getClosestTo(now)?.uvIndex
+		return@withContext UvIndex.from(uvIndex)
 	}
 
 //	private fun didLocationExceedThreshold(location: Location?, otherLocation: Location?): Boolean {

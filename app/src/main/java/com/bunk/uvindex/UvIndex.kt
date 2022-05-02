@@ -1,33 +1,41 @@
 package com.bunk.uvindex
 
 import androidx.annotation.ColorRes
+import kotlin.math.roundToInt
 
 sealed class UvIndex {
-	abstract val value: Int
+	abstract val value: Double
 
-	data class Low(override val value: Int) : UvIndex()
-	data class Moderate(override val value: Int) : UvIndex()
-	data class High(override val value: Int) : UvIndex()
-	data class VeryHigh(override val value: Int) : UvIndex()
-	data class Extreme(override val value: Int) : UvIndex()
+	fun rounded(): Int = value.roundToInt()
+
+	data class Low(override val value: Double) : UvIndex()
+	data class Moderate(override val value: Double) : UvIndex()
+	data class High(override val value: Double) : UvIndex()
+	data class VeryHigh(override val value: Double) : UvIndex()
+	data class Extreme(override val value: Double) : UvIndex()
 	object Unknown : UvIndex() {
-		override val value: Int = -1
+		override val value: Double = -1.0
 	}
 
 	companion object {
-		fun from(value: Int?): UvIndex = when {
-			value == null -> Unknown
-			value in 0..2 -> Low(value)
-			value in 3..5 -> Moderate(value)
-			value in 6..7 -> High(value)
-			value in 8..10 -> VeryHigh(value)
-			value >= 11 -> Extreme(value)
-			else -> Unknown
+
+		fun from(preciseValue: Double?): UvIndex {
+			val rounded: Int? = preciseValue?.roundToInt()
+
+			return when {
+				rounded == null -> Unknown
+				rounded in 0..2 -> Low(preciseValue)
+				rounded in 3..5 -> Moderate(preciseValue)
+				rounded in 6..7 -> High(preciseValue)
+				rounded in 8..10 -> VeryHigh(preciseValue)
+				rounded >= 11 -> Extreme(preciseValue)
+				else -> Unknown
+			}
 		}
 	}
 
 	override fun toString(): String {
-		return "UvIndex($value)"
+		return "UvIndex(rounded=${rounded()}, precise=$value)"
 	}
 }
 
