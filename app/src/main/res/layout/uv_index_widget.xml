@@ -31,4 +31,12 @@
         android:textSize="22sp"
         android:textStyle="bold" />
 
+    <ImageView
+        android:id="@+id/appwidget_wifi"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="8dp"
+        android:src="@drawable/ic_baseline_wifi_off_24"
+        android:visibility="gone" />
+
 </FrameLayout>

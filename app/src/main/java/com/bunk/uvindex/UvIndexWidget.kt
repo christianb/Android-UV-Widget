@@ -7,12 +7,13 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
+import android.view.View
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinComponent
 import timber.log.Timber
 
@@ -62,15 +63,21 @@ class UvIndexWidget : AppWidgetProvider(),
 		for (appWidgetId in appWidgetIds) {
 			val remoteViews = RemoteViews(context.packageName, R.layout.uv_index_widget)
 
-			val uvNumber: String = if (uvIndex == UvIndex.Unknown) "?" else uvIndex.rounded().toString()
-			remoteViews.setTextViewText(R.id.appwidget_text, uvNumber)
+			if (uvIndex == UvIndex.Unknown) {
+				remoteViews.setViewVisibility(R.id.appwidget_text, View.GONE)
+				remoteViews.setViewVisibility(R.id.appwidget_wifi, View.VISIBLE)
+				remoteViews.setInt(R.id.appwidget_imageview, "setColorFilter", Color.BLACK)
+			} else {
+				remoteViews.setViewVisibility(R.id.appwidget_text, View.VISIBLE)
+				remoteViews.setViewVisibility(R.id.appwidget_wifi, View.GONE)
 
-			Timber.d("updateWidget: $uvIndex")
+				remoteViews.setTextViewText(R.id.appwidget_text, uvIndex.rounded().toString())
+				remoteViews.setInt(R.id.appwidget_imageview, "setColorFilter", ContextCompat.getColor(context, uvColor(uvIndex)))
+			}
 
-			remoteViews.setImageViewResource(R.id.appwidget_imageview, R.drawable.uv_index_circular_background)
-			remoteViews.setInt(R.id.appwidget_imageview, "setColorFilter", ContextCompat.getColor(context, uvColor(uvIndex)))
-
-			remoteViews.setOnClickPendingIntent(R.id.appwidget_imageview, createOnClickPendingIntent(context, ACTION_CLICK))
+			val pendingIntent: PendingIntent = createOnClickPendingIntent(context, ACTION_CLICK)
+			remoteViews.setOnClickPendingIntent(R.id.appwidget_imageview, pendingIntent)
+			remoteViews.setOnClickPendingIntent(R.id.appwidget_wifi, pendingIntent)
 
 			// Instruct the widget manager to update the widget
 			appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
