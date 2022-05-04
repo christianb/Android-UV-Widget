@@ -1,20 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <style name="Theme.UvIndex" parent="Theme.AppCompat.Light.NoActionBar" />
-
-    <style name="Theme.UvIndex.AppWidgetContainerParent" parent="@android:style/Theme.DeviceDefault">
-        <!-- Radius of the outer bound of widgets to make the rounded corners -->
-        <item name="appWidgetRadius">16dp</item>
-        <!--
-        Radius of the inner view's bound of widgets to make the rounded corners.
-        It needs to be 8dp or less than the value of appWidgetRadius
-        -->
-        <item name="appWidgetInnerRadius">8dp</item>
-    </style>
-
-    <style name="Theme.UvIndex.AppWidgetContainer" parent="Theme.UvIndex.AppWidgetContainerParent">
-        <!-- Apply padding to avoid the content of the widget colliding with the rounded corners -->
-        <item name="appWidgetPadding">0dp</item>
-    </style>
 </resources>
