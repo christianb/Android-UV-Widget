@@ -12,5 +12,6 @@ interface OpenWeatherMapApi {
 		@Query("lat") latitude: Double,
 		@Query("lon") longitude: Double,
 		@Query("appid") apiKey: String = BuildConfig.API_KEY,
+		@Query("exclude") exclude: String = "current,minutely,daily,alerts"
 	): ApiResponse<WeatherData>
 }
