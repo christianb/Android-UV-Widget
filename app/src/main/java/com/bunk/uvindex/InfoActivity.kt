@@ -1,6 +1,5 @@
 package com.bunk.uvindex
 
-import android.app.Activity
 import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -33,7 +32,7 @@ class InfoActivity : AppCompatActivity() {
 		}
 
 		lifecycleScope.launch {
-			remainingEntriesTextView.text = "Remaining Entries in DB: ${uvRepository.countUpcoming(Instant.now())}"
+			remainingEntriesTextView.text = "Remaining Entries in DB: ${uvRepository.numberOfElementsAfter(Instant.now())}"
 		}
 	}
 }

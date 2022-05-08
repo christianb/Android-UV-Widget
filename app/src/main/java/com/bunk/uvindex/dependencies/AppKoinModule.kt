@@ -2,7 +2,9 @@ package com.bunk.uvindex.dependencies
 
 import android.content.Context
 import android.location.LocationManager
+import com.bunk.uvindex.FetchAndUpdateWeatherDataUseCase
 import com.bunk.uvindex.GetCurrentUvIndexUseCase
+import com.bunk.uvindex.GetMaxUvIndexUseCase
 import com.bunk.uvindex.UvIndexSharedPreferences
 import com.bunk.uvindex.api.OpenWeatherMapApi
 import com.bunk.uvindex.api.RetrofitConfiguration
@@ -38,9 +40,23 @@ val appModule = module {
 	// UseCases
 	factory<GetCurrentUvIndexUseCase> {
 		GetCurrentUvIndexUseCase(
-			weatherRepository = get(),
-			locationRepository = get(),
+			fetchAndUpdateWeatherDataUseCase = get(),
+			uvRepository = get()
+		)
+	}
+
+	factory<FetchAndUpdateWeatherDataUseCase> {
+		FetchAndUpdateWeatherDataUseCase(
 			uvRepository = get(),
+			locationRepository = get(),
+			weatherRepository = get()
+		)
+	}
+
+	factory<GetMaxUvIndexUseCase> {
+		GetMaxUvIndexUseCase(
+			fetchAndUpdateWeatherDataUseCase = get(),
+			uvRepository = get()
 		)
 	}
 

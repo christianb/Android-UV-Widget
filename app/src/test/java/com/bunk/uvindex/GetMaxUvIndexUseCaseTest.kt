@@ -15,12 +15,12 @@ import org.junit.Before
 import org.junit.Test
 import java.time.Instant
 
-class GetCurrentUvIndexUseCaseTest {
+class GetMaxUvIndexUseCaseTest {
 
-	private val uvRepository: UvRepository = mockk(relaxed = true)
 	private val fetchAndUpdateWeatherDataUseCase: FetchAndUpdateWeatherDataUseCase = mockk(relaxed = true)
+	private val uvRepository: UvRepository = mockk(relaxed = true)
 
-	private val classUnderTest = GetCurrentUvIndexUseCase(fetchAndUpdateWeatherDataUseCase, uvRepository)
+	private val classUnderTest = GetMaxUvIndexUseCase(fetchAndUpdateWeatherDataUseCase, uvRepository)
 
 	@Before
 	fun setUp() {
@@ -33,31 +33,24 @@ class GetCurrentUvIndexUseCaseTest {
 	}
 
 	@Test
-	fun `execute should get closest to now`() {
+	fun `execute should return max uv index`() {
 		val now: Instant = mockk { every { Instant.now() } returns this }
-		coEvery { uvRepository.getClosestTo(now) } returns createUvEntity(uvIndex = 7.0)
+		coEvery { uvRepository.getMaxWithin24Hours(now) } returns createUvEntity(uvIndex = 4.2)
 
 		val actual: UvIndex = runBlocking { classUnderTest.execute() }
 
-		assertThat(actual.value).isEqualTo(7.0)
+		assertThat(actual.value).isEqualTo(4.2)
 	}
 
 	@Test
-	fun `execute should call fetchAndUpdateWeatherDataUseCase and then getClosestTo`() {
+	fun `execute should call fetchAndUpdateWeatherDataUseCase and then getMaxWithin24Hours`() {
+		val now: Instant = mockk { every { Instant.now() } returns this }
+
 		runBlocking { classUnderTest.execute() }
 
 		coVerify(ordering = Ordering.ORDERED) {
-			fetchAndUpdateWeatherDataUseCase.execute(minRequiredEntriesInDb = 12)
-			uvRepository.getClosestTo(any())
+			fetchAndUpdateWeatherDataUseCase.execute(minRequiredEntriesInDb = 24)
+			uvRepository.getMaxWithin24Hours(now)
 		}
-	}
-
-	@Test
-	fun `execute should return UvIndex Unknown when getClosestTo returns null`() {
-		coEvery { uvRepository.getClosestTo(any()) } returns null
-
-		val actual: UvIndex = runBlocking { classUnderTest.execute() }
-
-		assertThat(actual).isEqualTo(UvIndex.Unknown)
 	}
 }

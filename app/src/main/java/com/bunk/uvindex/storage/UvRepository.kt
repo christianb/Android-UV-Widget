@@ -9,15 +9,22 @@ class UvRepository(
 	private val dao: UvDao
 ) {
 
-	suspend fun insertAll(uvEntities: List<UvEntity>) {
-		dao.deleteAll()
-		dao.insertAll(uvEntities)
+	suspend fun insert(uvEntities: List<UvEntity>) {
+		dao.insert(uvEntities)
 	}
 
-	suspend fun countUpcoming(now: Instant): Int = dao.countUpcoming(now.epochSecond)
+	suspend fun deleteAll() {
+		dao.deleteAll()
+	}
+
+	suspend fun numberOfElementsAfter(now: Instant): Int = dao.countUpcoming(now.epochSecond)
 
 	suspend fun getClosestTo(instant: Instant): UvEntity? {
 		return dao.getAllUpcoming(instant.epochSecond - HALF_AN_HOUR_IN_SECONDS).firstOrNull()
+	}
+
+	suspend fun getMaxWithin24Hours(now: Instant): UvEntity? {
+		return dao.getMaxUntil(now.epochSecond, now.plus(Duration.ofHours(24)).epochSecond)
 	}
 
 	companion object {

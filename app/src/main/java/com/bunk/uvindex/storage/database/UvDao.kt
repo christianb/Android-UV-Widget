@@ -10,8 +10,11 @@ interface UvDao {
 	@Query("SELECT * FROM UvEntity WHERE dt >= :nowInSeconds ORDER BY dt ASC")
 	suspend fun getAllUpcoming(nowInSeconds: Long): List<UvEntity>
 
+	@Query("SELECT * FROM UvEntity WHERE dt >= :nowInSeconds AND dt < :untilInSeconds ORDER BY uvIndex DESC LIMIT 1")
+	suspend fun getMaxUntil(nowInSeconds: Long, untilInSeconds: Long): UvEntity?
+
 	@Insert
-	suspend fun insertAll(uvEntities: List<UvEntity>)
+	suspend fun insert(uvEntities: List<UvEntity>)
 
 	@Query("DELETE FROM UvEntity WHERE dt < (:nowInSeconds)")
 	suspend fun deleteOlderThan(nowInSeconds: Long)

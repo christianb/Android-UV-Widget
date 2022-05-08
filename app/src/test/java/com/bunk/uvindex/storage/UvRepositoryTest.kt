@@ -1,5 +1,6 @@
 package com.bunk.uvindex.storage
 
+import com.bunk.uvindex.createUvEntity
 import com.bunk.uvindex.storage.database.UvDao
 import com.bunk.uvindex.storage.database.UvEntity
 import io.mockk.coEvery
@@ -7,8 +8,6 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.*
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 import java.time.Duration
 
@@ -21,15 +20,19 @@ class UvRepositoryTest {
 	private val classUnderTest = UvRepository(dao)
 
 	@Test
-	fun `insertAll should deleteAll and insertAll`() {
+	fun insert() {
 		val uvEntities = listOf(createUvEntity())
 
-		runBlocking { classUnderTest.insertAll(uvEntities) }
+		runBlocking { classUnderTest.insert(uvEntities) }
 
-		coVerify {
-			dao.deleteAll()
-			dao.insertAll(uvEntities)
-		}
+		coVerify { dao.insert(uvEntities) }
+	}
+
+	@Test
+	fun deleteAll() {
+		runBlocking { classUnderTest.deleteAll() }
+
+		coVerify { dao.deleteAll() }
 	}
 
 	@Test
@@ -38,7 +41,7 @@ class UvRepositoryTest {
 		coEvery { dao.countUpcoming(any()) } returns 42
 
 		val actual = runBlocking {
-			classUnderTest.countUpcoming(now)
+			classUnderTest.numberOfElementsAfter(now)
 		}
 
 		assertThat(actual).isEqualTo(42)
@@ -75,12 +78,14 @@ class UvRepositoryTest {
 		assertThat(actual).isNull()
 	}
 
-	private fun createUvEntity(
-		dt: Long = 0,
-		uvIndex: Double = 0.0,
-		longitude: Double = 0.0,
-		latitude: Double = 0.0,
-	): UvEntity {
-		return UvEntity(dt = dt, uvIndex = uvIndex, longitude = longitude, latitude = latitude)
+	@Test
+	fun `getMaxWithin24Hours should call dao with correct parameters`() {
+		val now = Instant.now()
+		val expected = createUvEntity()
+		coEvery { dao.getMaxUntil(now.epochSecond, now.plus(Duration.ofHours(24)).epochSecond) } returns expected
+
+		val actual = runBlocking { classUnderTest.getMaxWithin24Hours(now) }
+
+		assertThat(actual).isEqualTo(expected)
 	}
 }

@@ -1,5 +1,6 @@
 package com.bunk.uvindex.api
 
+// TODO write long parameter names
 data class WeatherData(
 	val lat: Double,
 	val lon: Double,
