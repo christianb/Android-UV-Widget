@@ -9,6 +9,7 @@ import com.bunk.uvindex.UvIndexSharedPreferences
 import com.bunk.uvindex.api.OpenWeatherMapApi
 import com.bunk.uvindex.api.RetrofitConfiguration
 import com.bunk.uvindex.api.WeatherRepository
+import com.bunk.uvindex.config.ConfigStorage
 import com.bunk.uvindex.location.LocationRepository
 import com.bunk.uvindex.permission.PermissionHelper
 import com.bunk.uvindex.storage.database.AppDatabase
@@ -68,4 +69,8 @@ val appModule = module {
 	single<UvDao> { get<AppDatabase>().uvDao() }
 
 	single { UvIndexSharedPreferences(context = androidApplication()) }
+
+	factory<ConfigStorage> {
+		ConfigStorage(applicationContext = androidApplication())
+	}
 }
