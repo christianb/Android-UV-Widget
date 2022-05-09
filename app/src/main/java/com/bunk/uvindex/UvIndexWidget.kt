@@ -11,6 +11,8 @@ import android.graphics.Color
 import android.view.View
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
+import com.bunk.uvindex.config.ConfigStorage
+import com.bunk.uvindex.config.WidgetDisplayConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,14 +26,19 @@ class UvIndexWidget : AppWidgetProvider(),
 					  KoinComponent {
 
 	private val getCurrentUvIndexUseCase: GetCurrentUvIndexUseCase = getKoin().get()
-	private val uvIndexSharedPreferences: UvIndexSharedPreferences = getKoin().get()
+	private val configStorage: ConfigStorage = getKoin().get()
+	private val getMaxUvIndexUseCase: GetMaxUvIndexUseCase = getKoin().get()
 
 	override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
 		Timber.d("onUpdate")
-		val updateCounter = uvIndexSharedPreferences.get()
-		uvIndexSharedPreferences.set(updateCounter + 1)
+
+		val widgetDisplayConfig = configStorage.read() ?: WidgetDisplayConfig.Current
+
 		CoroutineScope(Dispatchers.Main.immediate).launch {
-			val uvIndex: UvIndex = getCurrentUvIndexUseCase.execute()
+			val uvIndex: UvIndex = when (widgetDisplayConfig) {
+				WidgetDisplayConfig.Current -> getCurrentUvIndexUseCase.execute()
+				WidgetDisplayConfig.Max24Hours -> getMaxUvIndexUseCase.execute()
+			}
 			for (appWidgetId in appWidgetIds) {
 				updateAppWidget(context, appWidgetManager, appWidgetIds, uvIndex)
 			}
