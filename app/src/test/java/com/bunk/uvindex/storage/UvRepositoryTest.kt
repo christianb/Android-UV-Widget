@@ -1,8 +1,8 @@
 package com.bunk.uvindex.storage
 
+import com.bunk.uvindex.UvIndex
 import com.bunk.uvindex.createUvEntity
 import com.bunk.uvindex.storage.database.UvDao
-import com.bunk.uvindex.storage.database.UvEntity
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -51,12 +51,15 @@ class UvRepositoryTest {
 	@Test
 	fun `getClosestTo should get first of getAllUpcoming`() {
 		val now = Instant.now()
-		val expected = createUvEntity(dt = 1)
-		coEvery { dao.getAllUpcoming(any()) } returns listOf(expected, createUvEntity(dt = 2), createUvEntity(dt = 3))
+		coEvery { dao.getAllUpcoming(any()) } returns listOf(
+			createUvEntity(dt = 1, uvIndex = 2.5),
+			createUvEntity(dt = 2, uvIndex = 5.1),
+			createUvEntity(dt = 3, uvIndex = 7.2)
+		)
 
-		val actual = runBlocking { classUnderTest.getClosestTo(now) }
+		val actual: Double = runBlocking { classUnderTest.getClosestTo(now).value }
 
-		assertThat(actual).isEqualTo(expected)
+		assertThat(actual).isEqualTo(2.5)
 	}
 
 	@Test
@@ -70,22 +73,21 @@ class UvRepositoryTest {
 	}
 
 	@Test
-	fun `getClosestTo should get null when getAllUpcoming is empty`() {
+	fun `getClosestTo should get UvIndex Unknown when getAllUpcoming is empty`() {
 		coEvery { dao.getAllUpcoming(any()) } returns emptyList()
 
 		val actual = runBlocking { classUnderTest.getClosestTo(Instant.now()) }
 
-		assertThat(actual).isNull()
+		assertThat(actual).isEqualTo(UvIndex.Unknown)
 	}
 
 	@Test
 	fun `getMaxWithin24Hours should call dao with correct parameters`() {
 		val now = Instant.now()
-		val expected = createUvEntity()
-		coEvery { dao.getMaxUntil(now.epochSecond, now.plus(Duration.ofHours(24)).epochSecond) } returns expected
+		coEvery { dao.getMaxUntil(now.epochSecond, now.plus(Duration.ofHours(24)).epochSecond) } returns createUvEntity(uvIndex = 4.3)
 
-		val actual = runBlocking { classUnderTest.getMaxWithin24Hours(now) }
+		val actual: Double = runBlocking { classUnderTest.getMaxNext24Hours(now).value }
 
-		assertThat(actual).isEqualTo(expected)
+		assertThat(actual).isEqualTo(4.3)
 	}
 }

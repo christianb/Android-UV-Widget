@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -8,19 +9,22 @@
         android:id="@+id/remaining_entries_in_db"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="24sp" />
-
-    <TextView
-        android:id="@+id/update_counter"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="24sp" />
+        android:textSize="24sp"
+        tools:text="Remaining Entries: ..." />
 
     <TextView
         android:id="@+id/current_uv_index"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="24sp" />
+        android:textSize="24sp"
+        tools:text="Current UvIndex: ..." />
+
+    <TextView
+        android:id="@+id/max_uv_index"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="24sp"
+        tools:text="Max UvIndex: ..." />
 
     <RadioGroup
         android:id="@+id/radio_group"
@@ -29,20 +33,27 @@
 
         <RadioButton
             android:id="@+id/current_radio_button"
-            android:text="Current"
-            android:checked="false"
-            android:textSize="28sp"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:text="Current"
+            android:textSize="28sp" />
 
         <RadioButton
             android:id="@+id/max24Hours_radio_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:checked="false"
             android:text="Max 24 Hours"
-            android:textSize="28sp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:textSize="28sp" />
 
     </RadioGroup>
+
+    <Button
+        android:id="@+id/clear_and_refresh_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Clear Data and Fetch New One" />
 
 </LinearLayout>

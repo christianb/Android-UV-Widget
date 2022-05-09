@@ -13,11 +13,13 @@ import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
 import com.bunk.uvindex.config.ConfigStorage
 import com.bunk.uvindex.config.WidgetDisplayConfig
+import com.bunk.uvindex.storage.UvRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import timber.log.Timber
+import java.time.Instant
 
 /**
  * Implementation of App Widget functionality.
@@ -25,23 +27,30 @@ import timber.log.Timber
 class UvIndexWidget : AppWidgetProvider(),
 					  KoinComponent {
 
-	private val getCurrentUvIndexUseCase: GetCurrentUvIndexUseCase = getKoin().get()
 	private val configStorage: ConfigStorage = getKoin().get()
-	private val getMaxUvIndexUseCase: GetMaxUvIndexUseCase = getKoin().get()
+	private val uvRepository: UvRepository = getKoin().get()
+	private val fetchAndUpdateWeatherDataUseCase: FetchAndUpdateWeatherDataUseCase = getKoin().get()
 
 	override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
 		Timber.d("onUpdate")
 
 		val widgetDisplayConfig = configStorage.read() ?: WidgetDisplayConfig.Current
 
+		val now = Instant.now()
 		CoroutineScope(Dispatchers.Main.immediate).launch {
 			val uvIndex: UvIndex = when (widgetDisplayConfig) {
-				WidgetDisplayConfig.Current -> getCurrentUvIndexUseCase.execute()
-				WidgetDisplayConfig.Max24Hours -> getMaxUvIndexUseCase.execute()
+				WidgetDisplayConfig.Current -> uvRepository.getClosestTo(now)
+				WidgetDisplayConfig.Max24Hours -> uvRepository.getMaxNext24Hours(now)
 			}
 			for (appWidgetId in appWidgetIds) {
 				updateAppWidget(context, appWidgetManager, appWidgetIds, uvIndex)
 			}
+
+			val minRequiredEntriesInDb = when (widgetDisplayConfig) {
+				WidgetDisplayConfig.Current -> 12
+				WidgetDisplayConfig.Max24Hours -> 24
+			}
+			fetchAndUpdateWeatherDataUseCase.execute(minRequiredEntriesInDb)
 		}
 	}
 
@@ -57,7 +66,7 @@ class UvIndexWidget : AppWidgetProvider(),
 		super.onReceive(context, intent)
 
 		if (intent.action == ACTION_CLICK) {
-			update(context)
+			ConfigurationActivity.launch(context)
 		}
 	}
 

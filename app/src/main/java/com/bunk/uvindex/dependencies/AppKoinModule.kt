@@ -2,9 +2,8 @@ package com.bunk.uvindex.dependencies
 
 import android.content.Context
 import android.location.LocationManager
+import com.bunk.uvindex.ConfigurationViewModel
 import com.bunk.uvindex.FetchAndUpdateWeatherDataUseCase
-import com.bunk.uvindex.GetCurrentUvIndexUseCase
-import com.bunk.uvindex.GetMaxUvIndexUseCase
 import com.bunk.uvindex.UvIndexSharedPreferences
 import com.bunk.uvindex.api.OpenWeatherMapApi
 import com.bunk.uvindex.api.RetrofitConfiguration
@@ -39,25 +38,11 @@ val appModule = module {
 	factory<UvRepository> { UvRepository(dao = get()) }
 
 	// UseCases
-	factory<GetCurrentUvIndexUseCase> {
-		GetCurrentUvIndexUseCase(
-			fetchAndUpdateWeatherDataUseCase = get(),
-			uvRepository = get()
-		)
-	}
-
 	factory<FetchAndUpdateWeatherDataUseCase> {
 		FetchAndUpdateWeatherDataUseCase(
 			uvRepository = get(),
 			locationRepository = get(),
 			weatherRepository = get()
-		)
-	}
-
-	factory<GetMaxUvIndexUseCase> {
-		GetMaxUvIndexUseCase(
-			fetchAndUpdateWeatherDataUseCase = get(),
-			uvRepository = get()
 		)
 	}
 
@@ -72,5 +57,13 @@ val appModule = module {
 
 	factory<ConfigStorage> {
 		ConfigStorage(applicationContext = androidApplication())
+	}
+
+	factory<ConfigurationViewModel> {
+		ConfigurationViewModel(
+			uvRepository = get(),
+			configStorage = get(),
+			fetchAndUpdateWeatherDataUseCase = get()
+		)
 	}
 }
