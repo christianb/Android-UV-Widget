@@ -48,10 +48,9 @@ class ConfigurationViewModel(
 	}
 
 	private suspend fun executeRefresh() {
-		val now = Instant.now()
-		_currentUvIndex.value = uvRepository.getClosestTo(now)
-		_maxUvIndexNext24Hours.value = uvRepository.getMaxNext24Hours(now)
-		_remainingEntriesInDb.value = uvRepository.numberOfElementsAfter(now)
+		_currentUvIndex.value = uvRepository.getNow()
+		_maxUvIndexNext24Hours.value = uvRepository.getMaxNext24Hours()
+		_remainingEntriesInDb.value = uvRepository.numberOfElementsAfter(Instant.now())
 		_widgetDisplayConfig.value = configStorage.read() ?: WidgetDisplayConfig.Current
 	}
 

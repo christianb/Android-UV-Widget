@@ -19,7 +19,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import timber.log.Timber
-import java.time.Instant
 
 /**
  * Implementation of App Widget functionality.
@@ -36,11 +35,10 @@ class UvIndexWidget : AppWidgetProvider(),
 
 		val widgetDisplayConfig = configStorage.read() ?: WidgetDisplayConfig.Current
 
-		val now = Instant.now()
 		CoroutineScope(Dispatchers.Main.immediate).launch {
 			val uvIndex: UvIndex = when (widgetDisplayConfig) {
-				WidgetDisplayConfig.Current -> uvRepository.getClosestTo(now)
-				WidgetDisplayConfig.Max24Hours -> uvRepository.getMaxNext24Hours(now)
+				WidgetDisplayConfig.Current -> uvRepository.getNow()
+				WidgetDisplayConfig.Max24Hours -> uvRepository.getMaxNext24Hours()
 			}
 			for (appWidgetId in appWidgetIds) {
 				updateAppWidget(context, appWidgetManager, appWidgetIds, uvIndex)
@@ -52,14 +50,6 @@ class UvIndexWidget : AppWidgetProvider(),
 			}
 			fetchAndUpdateWeatherDataUseCase.execute(minRequiredEntriesInDb)
 		}
-	}
-
-	override fun onEnabled(context: Context) {
-		// Enter relevant functionality for when the first widget is created
-	}
-
-	override fun onDisabled(context: Context) {
-		// Enter relevant functionality for when the last widget is disabled
 	}
 
 	override fun onReceive(context: Context, intent: Intent) {
@@ -108,7 +98,6 @@ class UvIndexWidget : AppWidgetProvider(),
 	}
 
 	companion object {
-		private const val UV_INDEX = "uv_index_extra"
 		private const val ACTION_CLICK = "uvIndexWidget_onClick"
 
 		private fun createIntent(context: Context, action: String): Intent = Intent(context, UvIndexWidget::class.java).apply {
@@ -117,18 +106,9 @@ class UvIndexWidget : AppWidgetProvider(),
 			putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
 		}
 
-		fun send(context: Context, value: Int) {
-			val intent = createIntent(context, action = AppWidgetManager.ACTION_APPWIDGET_UPDATE).apply {
-				putExtra(UV_INDEX, value)
-			}
-			context.sendBroadcast(intent)
-		}
-
 		fun update(context: Context) {
 			context.sendBroadcast(createIntent(context, action = AppWidgetManager.ACTION_APPWIDGET_UPDATE))
 		}
-
-		fun read(intent: Intent): Int = intent.getIntExtra(UV_INDEX, -1)
 	}
 }
 

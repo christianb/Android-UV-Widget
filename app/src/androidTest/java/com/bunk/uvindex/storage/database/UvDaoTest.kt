@@ -28,7 +28,7 @@ class UvDaoTest {
 	@Test
 	fun getAllUpcoming_should_return_empty_list_when_db_is_empty() {
 		val actual: List<UvEntity> = runBlocking {
-			classUnderTest.uvDao().getAllUpcoming(Instant.now().epochSecond)
+			classUnderTest.uvDao().getAllAfter(Instant.now().epochSecond)
 		}
 
 		assertThat(actual).isEmpty()
@@ -40,7 +40,7 @@ class UvDaoTest {
 
 		val actual = runBlocking {
 			classUnderTest.uvDao().insert(listOf(entity))
-			classUnderTest.uvDao().getAllUpcoming(nowInSeconds = 0)
+			classUnderTest.uvDao().getAllAfter(nowInSeconds = 0)
 		}
 
 		assertThat(actual).containsExactly(entity)
@@ -111,7 +111,7 @@ class UvDaoTest {
 
 		val actual = runBlocking {
 			classUnderTest.uvDao().insert(listOf(entity1, entity2, entity3))
-			classUnderTest.uvDao().getAllUpcoming(nowInSeconds = 100)
+			classUnderTest.uvDao().getAllAfter(nowInSeconds = 100)
 		}
 
 		assertThat(actual).containsExactlyInAnyOrder(entity1, entity3)
@@ -126,7 +126,7 @@ class UvDaoTest {
 
 		val actual = runBlocking {
 			classUnderTest.uvDao().insert(listOf(entity1, entity2, entity3, entity4))
-			classUnderTest.uvDao().getAllUpcoming(nowInSeconds = 2)
+			classUnderTest.uvDao().getAllAfter(nowInSeconds = 2)
 		}
 
 		assertThat(actual).containsExactly(entity4, entity2, entity1, entity3)
@@ -139,7 +139,7 @@ class UvDaoTest {
 		val actual = runBlocking {
 			classUnderTest.uvDao().insert(listOf(entity))
 			classUnderTest.uvDao().deleteAll()
-			classUnderTest.uvDao().getAllUpcoming(nowInSeconds = 0)
+			classUnderTest.uvDao().getAllAfter(nowInSeconds = 0)
 		}
 
 		assertThat(actual).isEmpty()
@@ -155,7 +155,7 @@ class UvDaoTest {
 		val actual = runBlocking {
 			classUnderTest.uvDao().insert(listOf(entity1, entity2, entity3, entity4))
 			classUnderTest.uvDao().deleteOlderThan(nowInSeconds = 100)
-			classUnderTest.uvDao().getAllUpcoming(nowInSeconds = 100)
+			classUnderTest.uvDao().getAllAfter(nowInSeconds = 100)
 		}
 
 		assertThat(actual).containsExactly(entity3, entity1, entity4)

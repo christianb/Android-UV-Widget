@@ -7,11 +7,11 @@ import androidx.room.Query
 @Dao
 interface UvDao {
 
-	@Query("SELECT * FROM UvEntity WHERE dt >= :nowInSeconds ORDER BY dt ASC")
-	suspend fun getAllUpcoming(nowInSeconds: Long): List<UvEntity>
+	@Query("SELECT * FROM UvEntity WHERE dt >= :epochInSeconds ORDER BY dt ASC")
+	suspend fun getAllAfter(epochInSeconds: Long): List<UvEntity>
 
-	@Query("SELECT * FROM UvEntity WHERE dt >= :nowInSeconds AND dt < :untilInSeconds ORDER BY uvIndex DESC LIMIT 1")
-	suspend fun getMaxUntil(nowInSeconds: Long, untilInSeconds: Long): UvEntity?
+	@Query("SELECT * FROM UvEntity WHERE dt >= :startInSeconds AND dt < :untilInSeconds ORDER BY uvIndex DESC LIMIT 1")
+	suspend fun getMaxUntil(startInSeconds: Long, untilInSeconds: Long): UvEntity?
 
 	@Insert
 	suspend fun insert(uvEntities: List<UvEntity>)

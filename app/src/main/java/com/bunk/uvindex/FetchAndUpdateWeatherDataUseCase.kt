@@ -17,7 +17,7 @@ class FetchAndUpdateWeatherDataUseCase(
 	suspend fun execute(minRequiredEntriesInDb: Int) {
 		val location: Location = locationRepository.getLocation() ?: return
 
-		val numberOfFutureElements: Int = uvRepository.numberOfElementsAfter(now = Instant.now())
+		val numberOfFutureElements: Int = uvRepository.numberOfElementsAfter(instant = Instant.now())
 
 		if (numberOfFutureElements < minRequiredEntriesInDb) fetchAndUpdateWeather(location)
 	}

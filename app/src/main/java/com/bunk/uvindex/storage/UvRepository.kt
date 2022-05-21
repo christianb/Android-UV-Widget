@@ -7,7 +7,7 @@ import java.time.Duration
 import java.time.Instant
 
 class UvRepository(
-	private val dao: UvDao
+	private val dao: UvDao,
 ) {
 
 	suspend fun insert(uvEntities: List<UvEntity>) {
@@ -18,20 +18,23 @@ class UvRepository(
 		dao.deleteAll()
 	}
 
-	suspend fun numberOfElementsAfter(now: Instant): Int = dao.countUpcoming(now.epochSecond)
+	suspend fun numberOfElementsAfter(instant: Instant): Int = dao.countUpcoming(instant.epochSecond)
 
-	suspend fun getClosestTo(instant: Instant): UvIndex {
-		val uvIndex: Double? = dao.getAllUpcoming(instant.epochSecond - HALF_AN_HOUR_IN_SECONDS).firstOrNull()?.uvIndex
+	suspend fun getNow(): UvIndex {
+		val uvIndex: Double? = dao.getAllAfter(Instant.now().epochSecond - HALF_AN_HOUR_IN_SECONDS).firstOrNull()?.uvIndex
 		return UvIndex.from(uvIndex)
 	}
 
-	suspend fun getMaxNext24Hours(now: Instant): UvIndex {
-		val uvIndex: Double? = dao.getMaxUntil(now.epochSecond, now.plus(Duration.ofHours(24)).epochSecond)?.uvIndex
-		return UvIndex.from(uvIndex)
+	suspend fun getMaxNext24Hours(): UvIndex {
+		val now = Instant.now()
+		val uvEntity = dao.getMaxUntil(
+			startInSeconds = now.epochSecond - HALF_AN_HOUR_IN_SECONDS,
+			untilInSeconds = now.plus(Duration.ofHours(24)).epochSecond
+		)
+		return UvIndex.from(uvEntity?.uvIndex)
 	}
 
 	companion object {
-		private val HALF_AN_HOUR_IN_SECONDS = Duration.ofMinutes(30).seconds
-
+		val HALF_AN_HOUR_IN_SECONDS = Duration.ofMinutes(30).seconds
 	}
 }
